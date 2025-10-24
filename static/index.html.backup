@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SureFlights - Book Your Flight</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet" href="css/tailwind-custom.css">
+
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+
+<body class="bg-gray-100 text-gray-900 font-sans">
+
+    <nav class="bg-white shadow-md">
+
+        <div class="container mx-auto px-4">
+
+            <div class="flex justify-between items-center py-4">
+
+                <div class="flex items-center gap-2">
+
+                    <img src="images/logo.png" width="40" height="40" alt="SureFlights Logo" class="object-contain">
+
+                    <span class="text-xl font-bold">SureFlights</span>
+
+                </div>
+
+                <div class="hidden md:flex items-center gap-4">
+
+                    <button type="button" id="themeToggle" class="text-gray-600 hover:text-blue-600 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-1">
+
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+
+                        <span class="sr-only">Toggle theme</span>
+
+                    </button>
+
+                    <div class="flex items-center">
+
+                        <label for="currencySelect" class="text-sm font-medium mr-2">Currency</label>
+
+                        <select id="currencySelect" class="border border-gray-300 rounded-md px-2 py-1 text-sm">
+
+                            <option value="NGN">NGN (&#8358;)</option>
+
+                            <option value="USD">USD ($)</option>
+
+                            <option value="GBP">GBP (&pound;)</option>
+
+                            <option value="EUR">EUR (&euro;)</option>
+
+
+                            <option value="ZAR">ZAR (R)</option>
+ude 

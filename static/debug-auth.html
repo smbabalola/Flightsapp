@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Debug - SureFlights</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .debug-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+        .debug-section {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .debug-section h3 {
+            margin-top: 0;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+        }
+        pre {
+            background: #f3f4f6;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            overflow-x: auto;
+            font-size: 0.875rem;
+        }
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .status-ok { color: #10b981; font-weight: 600; }
+        .status-error { color: #ef4444; font-weight: 600; }
+    </style>
+</head>
+<body class="theme-light">
+    <div class="debug-container">
+        <h1>Authentication Debug Tool</h1>
+
+        <div class="debug-section">
+            <h3>Current Auth State</h3>
+            <div id="authState"></div>
+        </div>
+
+        <div class="debug-section">
+            <h3>Test Login</h3>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="testLogin()">Login as Admin</button>
+                <button class="btn btn-secondary" onclick="clearAuth()">Clear Auth</button>
+                <button class="btn btn-secondary" onclick="refreshAuthState()">Refresh State</button>
+            </div>
+            <div id="loginResult" style="margin-top: 1rem;"></div>
+        </div>
+
+        <div class="debug-section">
+            <h3>Test /auth/me Endpoint</h3>
+            <button class="btn btn-primary" onclick="testAuthMe()">Test GET /auth/me</button>
+            <div id="authMeResult" style="margin-top: 1rem;"></div>
+        </div>
+
+        <div class="debug-section">
+            <h3>Test Preferences Endpoint</h3>
+            <button class="btn btn-primary" onclick="testPreferences()">Test GET /v1/ops/preferences</button>
+            <div id="prefsResult" style="margin-top: 1rem;"></div>
+        </div>
+
+        <div class="debug-section">
+            <h3>Navigation</h3>
+            <div class="btn-group">
+                <a href="profile.html" class="btn btn-secondary">Go to Profile</a>
+                <a href="dashboard.html" class="btn btn-secondary">Go to Dashboard</a>
+                <a href="/" class="btn btn-secondary">Home</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = (window.location.port === "8001" ? "http://127.0.0.1:8000" : window.location.origin);
+
+        function refreshAuthState() {
+            const authStateDiv = document.getElementById('authState');
+            const token = localStorage.getItem('authToken');
+            const refreshToken = localStorage.getItem('refreshToken');
+            const user = localStorage.getItem('currentUser');
+
+            let html = '<pre>';
+            html += 'API Base: ' + API_BASE + '\n\n';
+            html += 'Has authToken: ' + (token ? '<span class="status-ok">YES</span>' : '<span class="status-error">NO</span>') + '\n';
+            html += 'Has refreshToken: ' + (refreshToken ? '<span class="status-ok">YES</span>' : '<span class="status-error">NO</span>') + '\n';
+            html += 'Has currentUser: ' + (user ? '<span class="status-ok">YES</span>' : '<span class="status-error">NO</span>') + '\n\n';
+
+            if (token) {
+                html += 'Token (first 100 chars):\n' + token.substring(0, 100) + '...\n\n';
+            }
+
+            if (user) {
+                try {
+                    html += 'Current User:\n' + JSON.stringify(JSON.parse(user), null, 2) + '\n';
+                } catch (e) {
+                    html += 'Current User: Invalid JSON\n';
+                }
+            }
+
+            html += '</pre>';
+            authStateDiv.innerHTML = html;
+        }
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.innerHTML = '<p>Logging in...</p>';
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'admin@sureflights.ng',
+                        password: 'admin123'
+                    })
+                });
+
+                const data = await response.json();
+
+                let html = '<pre>';
+                html += 'Status: ' + response.status + ' ' + response.statusText + '\n\n';
+                html += 'Response:\n' + JSON.stringify(data, null, 2);
+                html += '</pre>';
+
+                if (response.ok) {
+                    localStorage.setItem('authToken', data.access_token);
+                    localStorage.setItem('refreshToken', data.refresh_token);
+                    html = '<p class="status-ok">✓ Login successful!</p>' + html;
+
+                    // Now get user info
+                    const userResponse = await fetch(`${API_BASE}/auth/me`, {
+                        headers: { 'Authorization': `Bearer ${data.access_token}` }
+                    });
+                    const userData = await userResponse.json();
+
+                    if (userResponse.ok) {
+                        localStorage.setItem('currentUser', JSON.stringify(userData));
+                        html += '<p class="status-ok">✓ User data fetched and stored!</p>';
+                    }
+
+                    refreshAuthState();
+                } else {
+                    html = '<p class="status-error">✗ Login failed</p>' + html;
+                }
+
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="status-error">Error: ' + error.message + '</p><pre>' + error.stack + '</pre>';
+            }
+        }
+
+        async function testAuthMe() {
+            const resultDiv = document.getElementById('authMeResult');
+            const token = localStorage.getItem('authToken');
+
+            if (!token) {
+                resultDiv.innerHTML = '<p class="status-error">No token found. Please login first.</p>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<p>Testing /auth/me...</p>';
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const data = await response.json();
+
+                let html = '<pre>';
+                html += 'Status: ' + response.status + ' ' + response.statusText + '\n\n';
+                html += 'Response:\n' + JSON.stringify(data, null, 2);
+                html += '</pre>';
+
+                if (response.ok) {
+                    html = '<p class="status-ok">✓ /auth/me works!</p>' + html;
+                } else {
+                    html = '<p class="status-error">✗ /auth/me failed</p>' + html;
+                }
+
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="status-error">Error: ' + error.message + '</p>';
+            }
+        }
+
+        async function testPreferences() {
+            const resultDiv = document.getElementById('prefsResult');
+            const token = localStorage.getItem('authToken');
+
+            if (!token) {
+                resultDiv.innerHTML = '<p class="status-error">No token found. Please login first.</p>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<p>Testing /v1/ops/preferences...</p>';
+
+            try {
+                const response = await fetch(`${API_BASE}/v1/ops/preferences`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const data = await response.json();
+
+                let html = '<pre>';
+                html += 'Status: ' + response.status + ' ' + response.statusText + '\n\n';
+                html += 'Response:\n' + JSON.stringify(data, null, 2);
+                html += '</pre>';
+
+                if (response.ok) {
+                    html = '<p class="status-ok">✓ Preferences endpoint works!</p>' + html;
+                } else {
+                    html = '<p class="status-error">✗ Preferences endpoint failed</p>' + html;
+                }
+
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="status-error">Error: ' + error.message + '</p>';
+            }
+        }
+
+        function clearAuth() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('currentUser');
+            refreshAuthState();
+            document.getElementById('loginResult').innerHTML = '<p class="status-ok">Auth data cleared</p>';
+        }
+
+        // Initialize
+        refreshAuthState();
+    </script>
+</body>
+</html>

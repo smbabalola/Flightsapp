@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database
+  postgres:
+    image: postgres:15-alpine
+    container_name: sureflights_postgres
+    environment:
+      POSTGRES_USER: sureflights
+      POSTGRES_PASSWORD: sureflights_dev_password
+      POSTGRES_DB: sureflights
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sureflights"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sureflights_network
+
+  # Redis for idempotency and caching
+  redis:
+    image: redis:7-alpine
+    container_name: sureflights_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sureflights_network
+
+  # SureFlights API application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sureflights_app
+    ports:
+      - "8000:8000"
+    environment:
+      # App config
+      ENV: dev
+
+      # Database
+      DATABASE_URL: postgresql://sureflights:sureflights_dev_password@postgres:5432/sureflights
+
+      # Feature flags
+      USE_REAL_DUFFEL: ${USE_REAL_DUFFEL:-false}
+      USE_REAL_PAYSTACK: ${USE_REAL_PAYSTACK:-false}
+      USE_REDIS_IDEMPOTENCY: ${USE_REDIS_IDEMPOTENCY:-true}
+      USE_LIVE_FX_RATES: ${USE_LIVE_FX_RATES:-true}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+
+      # Integrations (pass from host .env)
+      DUFFEL_API_KEY: ${DUFFEL_API_KEY}
+      PAYSTACK_SECRET: ${PAYSTACK_SECRET}
+      PAYSTACK_PUBLIC_KEY: ${PAYSTACK_PUBLIC_KEY}
+      PAYSTACK_BASE_URL: https://api.paystack.co
+
+      # FX rate
+      FX_NGN_RATE: ${FX_NGN_RATE:-1650}
+
+      # Admin auth
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASS: ${ADMIN_PASS:-change_me}
+
+      # Redis
+      REDIS_URL: redis://redis:6379/0
+
+      # Sentry (optional)
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.1}
+      SENTRY_RELEASE: ${SENTRY_RELEASE:-}
+
+      # WhatsApp (optional)
+      WHATSAPP_VERIFY_TOKEN: ${WHATSAPP_VERIFY_TOKEN:-}
+      WHATSAPP_APP_SECRET: ${WHATSAPP_APP_SECRET:-}
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+    volumes:
+      # Mount for development (comment out for production)
+      - .:/app
+
+    networks:
+      - sureflights_network
+
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  sureflights_network:
+    driver: bridge

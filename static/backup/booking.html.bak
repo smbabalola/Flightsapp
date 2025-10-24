@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Booking - SureFlights</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .payment-methods {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--gray-200);
+        }
+
+        .payment-methods h4 {
+            margin-bottom: 0.75rem;
+        }
+
+        .payment-method-options {
+            display: grid;
+            gap: 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .payment-method-options {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        .payment-method-option {
+            border: 2px solid var(--gray-200);
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+            background: transparent;
+            text-align: left;
+            cursor: pointer;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .payment-method-option:hover {
+            border-color: var(--primary);
+            box-shadow: 0 10px 25px -15px rgba(37, 99, 235, 0.6);
+        }
+
+        .payment-method-option.selected {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.05);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .payment-method-option .option-title {
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .payment-method-option .option-subtitle {
+            font-size: 0.85rem;
+            color: var(--gray-600);
+        }
+
+        .payment-method-help {
+            font-size: 0.85rem;
+            color: var(--gray-600);
+            margin-top: 0.75rem;
+        }
+    </style>
+</head>
+<body class="theme-light">
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="/" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: inherit;">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <path d="M16 2L28 16L16 30L4 16L16 2Z" fill="#2563eb"/>
+                    </svg>
+                    <span>SureFlights</span>
+                </a>
+            </div>
+            <div class="nav-links">
+                <label for="currencySelect" style="margin-right:0.5rem;">Currency</label>
+                <select id="currencySelect" class="nav-currency-select" style="margin-right:1rem;">
+                    <option value="NGN">NGN (â‚¦)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="GBP">GBP (Â£)</option>
+                    <option value="EUR">EUR (â‚¬)</option>
+                    <option value="ZAR">ZAR (R)</option>
+                </select>
+                <button type="button" id="themeToggle" class="btn btn-secondary btn-sm" style="margin-right: 0.75rem;">Toggle Theme</button>
+<a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+                <a href="dashboard.html" id="dashboardLink" style="display: none;">My Bookings</a>
+                <a href="login.html" id="loginLink">Login</a>
+                <a href="signup.html" id="signupLink" class="btn btn-primary btn-sm">Sign Up</a>
+                <a href="#" id="logoutLink" style="display: none;">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="booking-container">
+        <div id="flightSummary" class="booking-card"></div>
+
+        <div class="booking-card">
+            <h3>Contact Information</h3>
+            <form id="bookingForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number *</label>
+                        <input type="tel" id="phone" placeholder="+2348012345678" required>
+                    </div>
+                </div>
+
+                <div id="passengersContainer"></div>
+
+                <!-- Promo Code Section -->
+                <div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--gray-200);">
+                    <h4 style="margin-bottom: 1rem;">Have a promo code?</h4>
+                    <div style="display: flex; gap: 0.75rem; align-items: start;">
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <input type="text" id="promoCode" placeholder="Enter promo code" style="text-transform: uppercase;">
+                            <div class="form-error"></div>
+                        </div>
+                        <button type="button" id="applyPromoBtn" class="btn btn-secondary" onclick="applyPromoCode()">
+                            Apply
+                        </button>
+                    </div>
+                    <div id="promoSuccess" class="success-message" style="display: none; margin-top: 0.75rem;"></div>
+                    <div id="promoError" class="error-message" style="display: none; margin-top: 0.75rem;"></div>
+                </div>
+
+                <!-- Payment Method Selection -->
+                <div class="payment-methods" id="paymentMethods">
+                    <h4>Choose how you want to pay</h4>
+                    <div class="payment-method-options" id="paymentMethodOptions">
+                        <button type="button" class="payment-method-option selected" data-method="card">
+                            <span class="option-title">Card</span>
+                            <span class="option-subtitle">Pay with your debit or credit card instantly.</span>
+                        </button>
+                        <button type="button" class="payment-method-option" data-method="bank">
+                            <span class="option-title">Bank Transfer</span>
+                            <span class="option-subtitle">Get bank account details for instant transfer.</span>
+                        </button>
+                        <button type="button" class="payment-method-option" data-method="ussd">
+                            <span class="option-title">USSD</span>
+                            <span class="option-subtitle">Use your bank's USSD code to authorize payment.</span>
+                        </button>
+                    </div>
+                    <p class="payment-method-help">We'll redirect you to Paystack to complete this payment securely.</p>
+                </div>
+
+                <div id="error" class="error-message" style="display: none;"></div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                        Back
+                    </button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">
+                        Proceed to Payment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>SureFlights</h3>
+                    <p>Your trusted partner for flight bookings worldwide</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="/">Home</a>
+                    <a href="about.html">About Us</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Account</h4>
+                    <a href="login.html" id="footerLogin">Login</a>
+                    <a href="signup.html" id="footerSignup">Sign Up</a>
+                    <a href="dashboard.html" id="footerDashboard" style="display: none;">My Bookings</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <a href="contact.html">Help Center</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Privacy Policy</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 SureFlights. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script src="main.js"></script>
+    <script>
+        let selectedOffer = null;
+        let appliedPromoCode = null;
+        let originalAmount = 0;
+        let finalAmount = 0;
+        let selectedPaymentMethod = 'card';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initThemeToggle();
+            updateNavigation();
+            if (!isLoggedIn()) {
+                alert('Please log in to continue.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            selectedOffer = JSON.parse(sessionStorage.getItem('selectedOffer'));
+            const searchParams = JSON.parse(sessionStorage.getItem('searchParams'));
+
+            if (!selectedOffer || !searchParams) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const storedMethod = sessionStorage.getItem('paymentMethod');
+            if (storedMethod && ['card', 'bank', 'ussd'].includes(storedMethod)) {
+                selectedPaymentMethod = storedMethod;
+            }
+            setupPaymentMethodSelection();
+            sessionStorage.setItem('paymentMethod', selectedPaymentMethod);
+
+            // Store original amount
+            originalAmount = parseFloat(selectedOffer.total_amount || selectedOffer.price?.total || 0);
+            finalAmount = originalAmount;
+
+            displayFlightSummary(selectedOffer);
+            generatePassengerForms(searchParams);
+
+            // Enable real-time validation
+            const form = document.getElementById('bookingForm');
+            if (form && typeof enableRealTimeValidation === 'function') {
+                enableRealTimeValidation(form);
+            }
+        });
+
+        function displayFlightSummary(offer) {
+            const segment = offer.slices[0].segments[0];
+            const airline = segment.marketing_carrier || { name: 'Airline', iata_code: 'XX' };
+
+            const departTime = new Date(segment.departing_at).toLocaleString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const price = formatPrice(offer.total_amount || offer.price?.total, offer.total_currency || offer.price?.currency);
+
+            const priceBreakdown = getPriceBreakdown(offer);
+
+            const summary = document.getElementById('flightSummary');
+            summary.innerHTML = `
+                <h3>Flight Summary</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Airline</span>
+                    <span class="detail-value">${airline.name}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Route</span>
+                    <span class="detail-value">${segment.origin.iata_code} ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ ${segment.destination.iata_code}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Departure</span>
+                    <span class="detail-value">${departTime}</span>
+                </div>
+                <div style="border-top: 2px solid var(--gray-200); margin: 1.5rem 0; padding-top: 1rem;">
+                    <h4 style="margin-bottom: 1rem; color: var(--gray-700);">Price Breakdown</h4>
+                    ${priceBreakdown}
+                    <div class="detail-row" style="margin-top: 1rem; padding-top: 1rem; border-top: 2px solid var(--gray-300);">
+                        <span class="detail-label" style="font-weight: 700;">Total Price</span>
+                        <span class="detail-value" style="color: var(--primary); font-size: 1.5rem; font-weight: 700;">${price}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getPriceBreakdown(offer) {
+            const total = parseFloat(offer.total_amount || offer.price?.total || 0);
+            const currency = offer.total_currency || offer.price?.currency || 'USD';
+
+            // Try to extract breakdown from offer data
+            const baseFare = offer.base_amount || (total * 0.75); // Estimate if not available
+            const taxes = offer.tax_amount || (total * 0.20); // Estimate
+            const fees = offer.fee_amount || (total * 0.05); // Estimate
+
+            const formatAmount = (amount) => {
+                if (currency === 'NGN') {
+                    return 'ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¦' + parseInt(amount).toLocaleString();
+                }
+                return currency + ' ' + parseFloat(amount).toFixed(2);
+            };
+
+            return `
+                <div class="detail-row" style="margin-bottom: 0.5rem;">
+                    <span class="detail-label">Base Fare</span>
+                    <span class="detail-value">${formatAmount(baseFare)}</span>
+                </div>
+                <div class="detail-row" style="margin-bottom: 0.5rem;">
+                    <span class="detail-label">Taxes & Fees</span>
+                    <span class="detail-value">${formatAmount(taxes)}</span>
+                </div>
+                <div class="detail-row" style="margin-bottom: 0.5rem;">
+                    <span class="detail-label">Service Fee</span>
+                    <span class="detail-value">${formatAmount(fees)}</span>
+                </div>
+            `;
+        }
+
+        function generatePassengerForms(search) {
+            const container = document.getElementById('passengersContainer');
+            const { adults, children = 0, infants = 0 } = search;
+            let passengerNumber = 1;
+
+            // Adults
+            for (let i = 0; i < adults; i++) {
+                container.appendChild(createPassengerForm(passengerNumber++, 'adult'));
+            }
+
+            // Children
+            for (let i = 0; i < children; i++) {
+                container.appendChild(createPassengerForm(passengerNumber++, 'child'));
+            }
+
+            // Infants
+            for (let i = 0; i < infants; i++) {
+                container.appendChild(createPassengerForm(passengerNumber++, 'infant_without_seat'));
+            }
+        }
+
+        function setupPaymentMethodSelection() {
+            const options = document.querySelectorAll('.payment-method-option');
+            if (!options.length) {
+                return;
+            }
+
+            options.forEach(option => {
+                const isSelected = option.dataset.method === selectedPaymentMethod;
+                option.classList.toggle('selected', isSelected);
+                option.addEventListener('click', () => {
+                    selectedPaymentMethod = option.dataset.method;
+                    options.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                    sessionStorage.setItem('paymentMethod', selectedPaymentMethod);
+                });
+            });
+        }
+
+        function createPassengerForm(num, type) {
+            const div = document.createElement('div');
+            div.className = 'passenger-form';
+
+            const typeLabel = type === 'adult' ? 'Adult' : type === 'child' ? 'Child' : 'Infant';
+
+            div.innerHTML = `
+                <h4>Passenger ${num} (${typeLabel})</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Title *</label>
+                        <select class="passenger-title" required>
+                            <option value="">Select</option>
+                            <option value="mr">Mr</option>
+                            <option value="mrs">Mrs</option>
+                            <option value="ms">Ms</option>
+                            <option value="miss">Miss</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>First Name *</label>
+                        <input type="text" class="passenger-first" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name *</label>
+                        <input type="text" class="passenger-last" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date of Birth *</label>
+                        <input type="date" class="passenger-dob" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Passport Number *</label>
+                        <input type="text" class="passenger-passport" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Passport Expiry *</label>
+                        <input type="date" class="passenger-expiry" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nationality *</label>
+                        <select class="passenger-nationality" required>
+                            <option value="">Select</option>
+                            <option value="NG">Nigeria</option>
+                            <option value="US">United States</option>
+                            <option value="GB">United Kingdom</option>
+                            <option value="GH">Ghana</option>
+                            <option value="KE">Kenya</option>
+                        </select>
+                    </div>
+                </div>
+                <input type="hidden" class="passenger-type" value="${type}">
+            `;
+
+            return div;
+        }
+
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await createBooking();
+        });
+
+        async function createBooking() {
+            // Validate form before proceeding
+            const form = document.getElementById('bookingForm');
+            if (typeof validateForm === 'function' && !validateForm(form)) {
+                return;
+            }
+
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+
+            // Collect passenger data
+            const passengerForms = document.querySelectorAll('.passenger-form');
+            const passengers = Array.from(passengerForms).map(form => ({
+                type: form.querySelector('.passenger-type').value,
+                title: form.querySelector('.passenger-title').value,
+                first: form.querySelector('.passenger-first').value,
+                last: form.querySelector('.passenger-last').value,
+                dob: form.querySelector('.passenger-dob').value,
+                passport: {
+                    number_token: form.querySelector('.passenger-passport').value,
+                    expiry: form.querySelector('.passenger-expiry').value,
+                    nationality: form.querySelector('.passenger-nationality').value
+                }
+            }));
+
+            const bookingData = {
+                offer_id: selectedOffer.id,
+                passengers: passengers,
+                contacts: {
+                    email: email,
+                    phone: phone
+                },
+                channel: 'web',
+                payment_method: selectedPaymentMethod,
+                offer: selectedOffer  // Include full offer with price info
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/v1/book`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(bookingData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Store booking reference
+                    sessionStorage.setItem('bookingReference', data.reference);
+                    sessionStorage.setItem('quoteId', data.quote_id);
+                    sessionStorage.setItem('paymentMethod', selectedPaymentMethod);
+
+                    // Redirect to payment
+                    window.location.href = data.payment_url;
+                } else {
+                    showError(data.detail || 'Booking failed. Please try again.');
+                }
+            } catch (error) {
+                showError('Network error. Please check your connection and try again.');
+            }
+        }
+
+                function formatPrice(amount, currency) {
+            const value = Number(amount || 0);
+            const curr = String(currency || 'USD').toUpperCase();
+            const symbols = { NGN: '₦', USD: '$', GBP: '£', EUR: '€', ZAR: 'R', JPY: '¥', CNY: '¥', CAD: '$', AUD: '$' };
+            const symbol = symbols[curr];
+            if (symbol) {
+                if (curr === 'NGN') {
+                    return symbol + parseInt(value).toLocaleString();
+                }
+                return symbol + value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+            return curr + ' ' + value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function applyPromoCode() {
+            const promoInput = document.getElementById('promoCode');
+            const promoCode = promoInput.value.trim().toUpperCase();
+            const applyBtn = document.getElementById('applyPromoBtn');
+            const successDiv = document.getElementById('promoSuccess');
+            const errorDiv = document.getElementById('promoError');
+
+            // Clear previous messages
+            successDiv.style.display = 'none';
+            errorDiv.style.display = 'none';
+
+            if (!promoCode) {
+                errorDiv.textContent = 'Please enter a promo code';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Disable button during validation
+            applyBtn.disabled = true;
+            applyBtn.textContent = 'Validating...';
+
+            try {
+                const currency = selectedOffer.total_currency || selectedOffer.price?.currency || 'NGN';
+
+                const response = await fetch(`${API_BASE}/v1/promo-codes/validate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        code: promoCode,
+                        amount: originalAmount,
+                        currency: currency
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.valid) {
+                    appliedPromoCode = data;
+                    finalAmount = data.final_amount;
+
+                    // Update price display
+                    updatePriceWithDiscount(data);
+
+                    // Show success message
+                    const savingsDisplay = currency === 'NGN'
+                        ? `ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¦${parseInt(data.savings).toLocaleString()}`
+                        : `${currency} ${data.savings.toFixed(2)}`;
+
+                    successDiv.innerHTML = `
+                        <strong>Promo code applied!</strong> You're saving ${savingsDisplay}
+                        <button onclick="removePromoCode()" style="margin-left: 1rem; padding: 0.25rem 0.75rem; background: transparent; border: 1px solid currentColor; border-radius: 0.25rem; cursor: pointer; font-size: 0.875rem;">
+                            Remove
+                        </button>
+                    `;
+                    successDiv.style.display = 'block';
+
+                    // Disable promo input
+                    promoInput.disabled = true;
+                    applyBtn.style.display = 'none';
+
+                } else {
+                    errorDiv.textContent = data.error || 'Invalid promo code';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error applying promo code:', error);
+                errorDiv.textContent = 'Failed to validate promo code. Please try again.';
+                errorDiv.style.display = 'block';
+            } finally {
+                applyBtn.disabled = false;
+                applyBtn.textContent = 'Apply';
+            }
+        }
+
+        function updatePriceWithDiscount(promoData) {
+            const currency = selectedOffer.total_currency || selectedOffer.price?.currency || 'NGN';
+            const formatAmount = (amt) => {
+                return currency === 'NGN'
+                    ? `ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¦${parseInt(amt).toLocaleString()}`
+                    : `${currency} ${parseFloat(amt).toFixed(2)}`;
+            };
+
+            // Find the total price element in the price breakdown
+            const totalPriceElements = document.querySelectorAll('.detail-value');
+            const lastElement = totalPriceElements[totalPriceElements.length - 1];
+
+            if (lastElement) {
+                lastElement.innerHTML = `
+                    <div style="text-align: right;">
+                        <div style="text-decoration: line-through; color: var(--gray-500); font-size: 1rem;">
+                            ${formatAmount(promoData.original_amount)}
+                        </div>
+                        <div style="color: var(--primary); font-size: 1.5rem; font-weight: 700;">
+                            ${formatAmount(promoData.final_amount)}
+                        </div>
+                        <div style="color: var(--success); font-size: 0.875rem; margin-top: 0.25rem;">
+                            Saved ${formatAmount(promoData.savings)}!
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function removePromoCode() {
+            appliedPromoCode = null;
+            finalAmount = originalAmount;
+
+            // Reset UI
+            document.getElementById('promoCode').value = '';
+            document.getElementById('promoCode').disabled = false;
+            document.getElementById('applyPromoBtn').style.display = 'block';
+            document.getElementById('promoSuccess').style.display = 'none';
+
+            // Reset price display
+            displayFlightSummary(selectedOffer);
+        }
+    </script>
+</body>
+</html>

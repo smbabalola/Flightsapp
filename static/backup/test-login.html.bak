@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Login - SureFlights</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-light">
+    <div class="auth-container">
+        <div class="auth-card">
+            <h2>Quick Test Login</h2>
+            <p style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: 1.5rem;">
+                Use this page to quickly test login functionality
+            </p>
+
+            <div id="error" class="error-message" style="display: none;"></div>
+            <div id="success" class="success-message" style="display: none;"></div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" required value="admin@sureflights.ng">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required value="admin123">
+                    <p style="font-size: 0.75rem; color: var(--gray-500); margin-top: 0.25rem;">
+                        Default admin password: admin123
+                    </p>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-large" id="submitBtn">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="auth-links">
+                <a href="login.html">Regular Login</a> |
+                <a href="signup.html">Sign Up</a> |
+                <a href="/">Home</a>
+            </div>
+
+            <div style="margin-top: 2rem; padding: 1rem; background: var(--gray-50); border-radius: 0.5rem;">
+                <h4 style="margin-top: 0;">Test Accounts:</h4>
+                <ul style="font-size: 0.875rem; color: var(--gray-700);">
+                    <li><strong>Admin:</strong> admin@sureflights.ng / admin123</li>
+                </ul>
+            </div>
+
+            <div id="debugInfo" style="margin-top: 1rem; padding: 1rem; background: #f0f9ff; border-radius: 0.5rem; font-family: monospace; font-size: 0.75rem; display: none;">
+                <h5>Debug Info:</h5>
+                <pre id="debugContent" style="white-space: pre-wrap; word-wrap: break-word;"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        const API_BASE = (window.location.port === "8001" ? "http://127.0.0.1:8000" : window.location.origin);
+
+        // Redirect if already logged in
+        if (isLoggedIn()) {
+            window.location.href = 'dashboard.html';
+        }
+
+        // Handle login form submission
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const submitBtn = document.getElementById('submitBtn');
+            const errorDiv = document.getElementById('error');
+            const successDiv = document.getElementById('success');
+            const debugDiv = document.getElementById('debugInfo');
+            const debugContent = document.getElementById('debugContent');
+
+            // Hide messages
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            debugDiv.style.display = 'none';
+
+            // Disable button
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Signing in...';
+
+            try {
+                console.log('Attempting login to:', `${API_BASE}/auth/login`);
+
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                // Show debug info
+                debugDiv.style.display = 'block';
+                debugContent.textContent = JSON.stringify({
+                    status: response.status,
+                    statusText: response.statusText,
+                    response: data
+                }, null, 2);
+
+                if (response.ok) {
+                    // Store token
+                    localStorage.setItem('authToken', data.access_token);
+                    localStorage.setItem('refreshToken', data.refresh_token);
+
+                    // Get user info
+                    const userResponse = await fetch(`${API_BASE}/auth/me`, {
+                        headers: {
+                            'Authorization': `Bearer ${data.access_token}`
+                        }
+                    });
+
+                    const userData = await userResponse.json();
+                    localStorage.setItem('currentUser', JSON.stringify(userData));
+
+                    successDiv.textContent = 'Login successful! Redirecting to profile...';
+                    successDiv.style.display = 'block';
+
+                    // Redirect to profile page
+                    setTimeout(() => {
+                        window.location.href = 'profile.html';
+                    }, 1500);
+                } else {
+                    errorDiv.textContent = data.detail || 'Login failed';
+                    errorDiv.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Sign In';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorDiv.textContent = 'Network error: ' + error.message;
+                errorDiv.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Sign In';
+
+                debugDiv.style.display = 'block';
+                debugContent.textContent = 'Error: ' + error.toString();
+            }
+        });
+
+        // Add button to check current auth state
+        const checkAuthBtn = document.createElement('button');
+        checkAuthBtn.textContent = 'Check Auth State';
+        checkAuthBtn.className = 'btn btn-secondary';
+        checkAuthBtn.style.marginTop = '1rem';
+        checkAuthBtn.addEventListener('click', () => {
+            const debugDiv = document.getElementById('debugInfo');
+            const debugContent = document.getElementById('debugContent');
+
+            debugDiv.style.display = 'block';
+            debugContent.textContent = JSON.stringify({
+                isLoggedIn: isLoggedIn(),
+                hasToken: !!localStorage.getItem('authToken'),
+                hasUser: !!localStorage.getItem('currentUser'),
+                token: localStorage.getItem('authToken')?.substring(0, 50) + '...',
+                user: JSON.parse(localStorage.getItem('currentUser') || 'null')
+            }, null, 2);
+        });
+
+        document.querySelector('.auth-card').appendChild(checkAuthBtn);
+    </script>
+</body>
+</html>

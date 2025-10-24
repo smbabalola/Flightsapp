@@ -1,0 +1,213 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Promo Codes{% endblock %}
+
+{% block content %}
+{% if request.query_params.get('created') %}
+<div class="alert alert-success">
+    ✓ Promo code created successfully!
+</div>
+{% endif %}
+
+<div class="card">
+    <h2>Create Promo Code</h2>
+    <p style="color: #666; margin-bottom: 2rem;">Create a new promotional code for customer discounts</p>
+
+    <form method="POST" action="/admin/promo-codes" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; max-width: 1000px;">
+        <div class="form-group">
+            <label for="code">Promo Code *</label>
+            <input
+                type="text"
+                id="code"
+                name="code"
+                style="text-transform: uppercase;"
+                placeholder="e.g., SUMMER2025"
+                required
+            >
+            <small style="color: #666; display: block; margin-top: 0.25rem;">
+                Code will be automatically uppercased
+            </small>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <input
+                type="text"
+                id="description"
+                name="description"
+                placeholder="e.g., Summer 2025 Discount"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="discount_type">Discount Type *</label>
+            <select id="discount_type" name="discount_type" required onchange="updateDiscountFields()">
+                <option value="percentage">Percentage</option>
+                <option value="fixed">Fixed Amount</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="discount_value">Discount Value *</label>
+            <input
+                type="number"
+                id="discount_value"
+                name="discount_value"
+                step="0.01"
+                min="0"
+                placeholder="e.g., 10 for 10% or 5000 for ₦5000"
+                required
+            >
+            <small id="discount_hint" style="color: #666; display: block; margin-top: 0.25rem;">
+                Enter percentage (e.g., 10 for 10%)
+            </small>
+        </div>
+
+        <div class="form-group" id="currency_group" style="display: none;">
+            <label for="currency">Currency</label>
+            <select id="currency" name="currency">
+                <option value="NGN">NGN</option>
+                <option value="USD">USD</option>
+            </select>
+            <small style="color: #666; display: block; margin-top: 0.25rem;">
+                Required for fixed amount discounts
+            </small>
+        </div>
+
+        <div class="form-group">
+            <label for="max_uses">Maximum Uses</label>
+            <input
+                type="number"
+                id="max_uses"
+                name="max_uses"
+                min="1"
+                placeholder="Leave empty for unlimited"
+            >
+            <small style="color: #666; display: block; margin-top: 0.25rem;">
+                Total number of times this code can be used
+            </small>
+        </div>
+
+        <div class="form-group">
+            <label for="min_purchase_amount">Minimum Purchase Amount</label>
+            <input
+                type="number"
+                id="min_purchase_amount"
+                name="min_purchase_amount"
+                step="0.01"
+                min="0"
+                placeholder="e.g., 50000 for ₦50,000"
+            >
+            <small style="color: #666; display: block; margin-top: 0.25rem;">
+                Minimum booking amount required
+            </small>
+        </div>
+
+        <div class="form-group">
+            <label for="valid_until">Expiry Date</label>
+            <input
+                type="datetime-local"
+                id="valid_until"
+                name="valid_until"
+            >
+            <small style="color: #666; display: block; margin-top: 0.25rem;">
+                Leave empty for no expiry
+            </small>
+        </div>
+
+        <div style="grid-column: span 2; margin-top: 0.5rem;">
+            <button type="submit" class="btn btn-success">Create Promo Code</button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Active Promo Codes</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Description</th>
+                <th>Discount</th>
+                <th>Usage</th>
+                <th>Min. Purchase</th>
+                <th>Expires</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for promo in promo_codes %}
+            <tr>
+                <td><strong>{{ promo.code }}</strong></td>
+                <td>{{ promo.description or '-' }}</td>
+                <td>
+                    {% if promo.discount_type == 'percentage' %}
+                        {{ promo.discount_value }}%
+                    {% else %}
+                        {{ promo.currency }} {{ "{:,.0f}".format(promo.discount_value) }}
+                    {% endif %}
+                </td>
+                <td>
+                    {{ promo.times_used }}{% if promo.max_uses %} / {{ promo.max_uses }}{% else %} / ∞{% endif %}
+                </td>
+                <td>
+                    {% if promo.min_purchase_amount %}
+                        ₦{{ "{:,.0f}".format(promo.min_purchase_amount) }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if promo.valid_until %}
+                        {{ promo.valid_until.strftime('%Y-%m-%d') }}
+                    {% else %}
+                        Never
+                    {% endif %}
+                </td>
+                <td>
+                    {% if promo.is_active %}
+                        <span class="badge success">Active</span>
+                    {% else %}
+                        <span class="badge danger">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if promo.is_active %}
+                    <form method="POST" action="/admin/promo-codes/{{ promo.code }}/deactivate" style="display: inline;">
+                        <button type="submit" class="btn" style="background: #e74c3c; color: white; padding: 0.25rem 0.75rem; font-size: 0.875rem;">
+                            Deactivate
+                        </button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" style="text-align: center; color: #666; padding: 2rem;">
+                    No promo codes found. Create one above!
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+function updateDiscountFields() {
+    const discountType = document.getElementById('discount_type').value;
+    const currencyGroup = document.getElementById('currency_group');
+    const discountHint = document.getElementById('discount_hint');
+
+    if (discountType === 'fixed') {
+        currencyGroup.style.display = 'block';
+        document.getElementById('currency').required = true;
+        discountHint.textContent = 'Enter fixed amount (e.g., 5000 for ₦5000)';
+    } else {
+        currencyGroup.style.display = 'none';
+        document.getElementById('currency').required = false;
+        discountHint.textContent = 'Enter percentage (e.g., 10 for 10%)';
+    }
+}
+</script>
+{% endblock %}

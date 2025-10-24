@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - SureFlights</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-light">
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="/" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: inherit;">
+                    <img src="images/logo.png" width="40" height="40" alt="SureFlights Logo" style="object-fit: contain;">
+                    <span style="font-weight: 700; font-size: 1.25rem;">SureFlights</span>
+                </a>
+            </div>
+            <div class="nav-links">
+                <label for="currencySelect" style="margin-right:0.5rem;">Currency</label>
+                <select id="currencySelect" class="nav-currency-select" style="margin-right:1rem;">
+                    <option value="NGN">NGN (₦)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="GBP">GBP (£)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="ZAR">ZAR (R)</option>
+                </select>
+                <a href="/">Search Flights</a>
+                <a href="dashboard.html" class="active">My Bookings</a>
+                <a href="profile.html">Profile</a>
+                <span id="localeBadge" style="color: var(--gray-600); margin-right: 0.5rem; display:inline-flex; align-items:center; gap:0.25rem;"></span>
+                <a href="#" id="logoutLink">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>My Bookings</h1>
+            <div style="display:flex;align-items:center;gap:1rem;margin-top:0.5rem;flex-wrap:wrap;">
+                <p id="userGreeting" style="color: var(--gray-600); margin: 0;"></p>
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <label for="currencySelect" style="color: var(--gray-700); font-weight:600;">Display currency:</label>
+                    <select id="currencySelect" class="input" style="min-width:120px;">
+                        <option value="NGN">NGN (Ã¢â€šÂ¦)</option>
+                        <option value="GHS">GHS (Ã¢â€šÂµ)</option>
+                        <option value="ZAR">ZAR (R)</option>
+                        <option value="USD">USD ($)</option>
+                    </select>
+                    <button id="saveCurrencyBtn" class="btn btn-secondary btn-sm">Save</button>
+                    <span id="currencySavedMsg" style="display:none;color:var(--green-700);font-size:0.875rem;">Saved Ã¢Å“â€œ</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Loading your bookings...</p>
+        </div>
+
+        <div id="error" class="error-message" style="display: none;"></div>
+
+        <div id="emptyState" style="display: none; text-align: center; padding: 4rem 2rem; background: white; border-radius: 0.75rem;">
+            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" style="margin: 0 auto 1rem; opacity: 0.3;">
+                <path d="M32 8L56 32L32 56L8 32L32 8Z" fill="currentColor"/>
+            </svg>
+            <h3 style="color: var(--gray-700); margin-bottom: 0.5rem;">No bookings yet</h3>
+            <p style="color: var(--gray-500); margin-bottom: 2rem;">Start your journey by searching for flights</p>
+            <a href="/" class="btn btn-primary">Search Flights</a>
+        </div>
+
+        <div id="bookingsList" class="booking-list"></div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>SureFlights</h3>
+                    <p>Your trusted partner for flight bookings worldwide</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="/">Home</a>
+                    <a href="about.html">About Us</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Account</h4>
+                    <a href="login.html" id="footerLogin">Login</a>
+                    <a href="signup.html" id="footerSignup">Sign Up</a>
+                    <a href="dashboard.html" id="footerDashboard" style="display: none;">My Bookings</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <a href="contact.html">Help Center</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Privacy Policy</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 SureFlights. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script>
+        // Check if user is logged in
+        if (!isLoggedIn()) {
+            window.location.href = 'login.html?return=dashboard.html';
+        }
+
+        // Load user bookings
+        async function loadBookings() {
+            const loadingDiv = document.getElementById('loading');
+            const errorDiv = document.getElementById('error');
+            const emptyState = document.getElementById('emptyState');
+            const bookingsList = document.getElementById('bookingsList');
+
+            loadingDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+            emptyState.style.display = 'none';
+
+            try {
+                const response = await authFetch('/v1/bookings');
+                const bookings = await response.json();
+
+                loadingDiv.style.display = 'none';
+
+                if (!bookings || bookings.length === 0) {
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                displayBookings(bookings);
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+                loadingDiv.style.display = 'none';
+
+                // Show empty state instead of error for better UX
+                emptyState.style.display = 'block';
+            }
+        }
+
+        function displayBookings(bookings) {
+            const bookingsList = document.getElementById('bookingsList');
+            bookingsList.innerHTML = '';
+
+            bookings.forEach(booking => {
+                const bookingItem = createBookingCard(booking);
+                bookingsList.appendChild(bookingItem);
+            });
+        }
+
+        function createBookingCard(booking) {
+            const div = document.createElement('div');
+            div.className = 'booking-item';
+
+            const status = booking.status || 'confirmed';
+            const statusClass = status === 'confirmed' ? 'confirmed' :
+                                status === 'cancelled' ? 'cancelled' :
+                                status === 'ticketed' ? 'ticketed' : 'pending';
+
+            // Determine if cancellation is allowed
+            const canCancel = status !== 'cancelled' && status !== 'refunded';
+            const pnr = booking.pnr || 'N/A';
+
+            div.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                    <div>
+                        <h3 style="margin-bottom: 0.5rem;">Booking ${booking.booking_reference || pnr}</h3>
+                        <span class="booking-status ${statusClass}">${status.toUpperCase()}</span>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary);">
+                            ${formatPrice(booking.total_amount || booking.total_price_ngn, booking.currency)}
+                        </div>
+                    </div>
+                </div>
+
+                ${pnr !== 'N/A' ? `<div style="color: var(--gray-600); margin-bottom: 0.5rem;">
+                    <strong>PNR:</strong> ${pnr}
+                </div>` : ''}
+
+                ${booking.route_summary ? `<div style="color: var(--gray-600); margin-bottom: 0.5rem;">
+                    <strong>Route:</strong> ${booking.route_summary}
+                </div>` : ''}
+
+                <div style="color: var(--gray-600); margin-bottom: 0.5rem;">
+                    <strong>Passenger:</strong> ${booking.passenger_name || 'N/A'}
+                </div>
+
+                ${booking.email ? `<div style="color: var(--gray-600); margin-bottom: 0.5rem;">
+                    <strong>Email:</strong> ${booking.email}
+                </div>` : ''}
+
+                <div style="color: var(--gray-600); margin-bottom: 1rem;">
+                    <strong>Booked:</strong> ${new Date(booking.created_at).toLocaleDateString()}
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--gray-200);">
+                    <a href="booking-details.html?id=${booking.id}" class="btn btn-secondary btn-sm">
+                        View Details
+                    </a>
+                    ${booking.etickets && booking.etickets.length > 0 ? `
+                        <button onclick="downloadETicket(${booking.id})" class="btn btn-secondary btn-sm">
+                            Download E-Ticket
+                        </button>
+                    ` : ''}
+                    ${canCancel ? `
+                        <a href="cancel-booking.html?trip_id=${booking.id}" class="btn btn-sm" style="background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;">
+                            Request Cancellation
+                        </a>
+                    ` : ''}
+                </div>
+            `;
+
+            return div;
+        }
+
+        function formatPrice(amount, currency = 'NGN') {
+            if (currency === 'NGN') {
+                return 'Ã¢â€šÂ¦' + parseInt(amount).toLocaleString();
+            }
+            return currency + ' ' + parseFloat(amount).toLocaleString();
+        }
+
+        function downloadETicket(bookingId) {
+            // Simple implementation - in production, this would fetch from API
+            alert('E-Ticket download initiated for booking #' + bookingId);
+            // You can enhance this to actually download a PDF or formatted file
+        }
+
+        async function loadPreferences() {
+            if (!isLoggedIn()) return;
+            try {
+                const res = await authFetch('/v1/ops/preferences');
+                if (!res.ok) return;
+                const prefs = await res.json();
+                const select = document.getElementById('currencySelect');
+                if (prefs && prefs.preferred_currency && select) {
+                    select.value = prefs.preferred_currency;
+                }
+            } catch {}
+        }
+
+        async function showLocaleBadge() {
+            try {
+                const res = await fetch(`${API_BASE}/v1/currency/default`);
+                if (!res.ok) return;
+                const j = await res.json();
+                const el = document.getElementById('localeBadge');
+                if (!el) return;
+                const country = j.country || 'Ã¢â‚¬â€';
+                const curr = j.currency || 'Ã¢â‚¬â€';
+                el.textContent = `Location: ${country} Ã¢â‚¬Â¢ Currency: ${curr}`;
+            } catch {}
+        }
+
+        async function saveCurrencyPreference() {
+            const select = document.getElementById('currencySelect');
+            const btn = document.getElementById('saveCurrencyBtn');
+            const msg = document.getElementById('currencySavedMsg');
+            if (!select) return;
+            const currency = select.value;
+            try {
+                btn.disabled = true;
+                const res = await authFetch('/v1/ops/preferences', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ country: 'NG', preferred_currency: currency })
+                });
+                if (res.ok) {
+                    msg.style.display = 'inline';
+                    setTimeout(() => msg.style.display = 'none', 2000);
+                }
+            } catch (e) { console.warn('Failed to save currency', e); }
+            finally { btn.disabled = false; }
+        }
+
+        // Load bookings on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            showLocaleBadge();
+            loadPreferences().then(loadBookings);
+            const btn = document.getElementById('saveCurrencyBtn');
+            if (btn) btn.addEventListener('click', saveCurrencyPreference);
+        });
+    </script>
+
+    <style>
+        .booking-status.cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .booking-status.ticketed {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+    </style>
+</body>
+</html>

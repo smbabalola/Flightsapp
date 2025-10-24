@@ -1,0 +1,83 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Pricing & FX Configuration{% endblock %}
+
+{% block content %}
+{% if request.query_params.get('updated') %}
+<div class="alert alert-success">
+    ✓ Fees updated successfully!
+</div>
+{% endif %}
+
+<div class="card">
+    <h2>Pricing & FX Configuration</h2>
+    <p style="color: #666; margin-bottom: 2rem;">Configure base currency, FX safety margin, markup and fees</p>
+
+    <form method="POST" action="/admin/fees" style="max-width: 720px;">
+        <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div class="form-group">
+                <label for="base_pricing_currency">Base Pricing Currency</label>
+                <input type="text" id="base_pricing_currency" name="base_pricing_currency" maxlength="3" value="{{ current_fees.base_pricing_currency }}" required>
+                <small style="color:#666;">Internal normalization currency (recommended: USD)</small>
+            </div>
+            <div class="form-group">
+                <label for="default_display_currency">Default Display Currency</label>
+                <input type="text" id="default_display_currency" name="default_display_currency" maxlength="3" value="{{ current_fees.default_display_currency }}" required>
+                <small style="color:#666;">Shown to users when no preference is set</small>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="markup_percentage">Markup Percentage</label>
+            <input type="number" id="markup_percentage" name="markup_percentage" step="0.1" min="0" max="100" value="{{ current_fees.markup_percentage }}" required>
+            <small style="color:#666;">Percentage added after FX conversion</small>
+        </div>
+
+        <div class="form-group">
+            <label for="booking_fee_fixed">Booking Fee (fixed)</label>
+            <input type="number" id="booking_fee_fixed" name="booking_fee_fixed" step="1" min="0" value="{{ current_fees.booking_fee_fixed }}" required>
+            <small style="color:#666;">Fixed fee in display currency</small>
+        </div>
+
+        <div class="form-group">
+            <label for="payment_fee_percentage">Payment Fee Percentage</label>
+            <input type="number" id="payment_fee_percentage" name="payment_fee_percentage" step="0.1" min="0" max="100" value="{{ current_fees.payment_fee_percentage }}" required>
+            <small style="color:#666;">Gateway/processing fee applied at the end</small>
+        </div>
+
+        <div class="form-group">
+            <label for="fx_safety_margin_pct">FX Safety Margin (%)</label>
+            <input type="number" id="fx_safety_margin_pct" name="fx_safety_margin_pct" step="0.1" min="0" max="20" value="{{ current_fees.fx_safety_margin_pct }}" required>
+            <small style="color:#666;">Protects against FX fluctuations on display rates</small>
+        </div>
+
+        <div style="margin-top: 1.5rem;">
+            <button type="submit" class="btn btn-success">Save Changes</button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Fee Examples</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Base (display)</th>
+                <th>Markup</th>
+                <th>Final Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>50,000</td>
+                <td>{{ current_fees.markup_percentage }}%</td>
+                <td>{{ "{:,.0f}".format(50000 * (1 + current_fees.markup_percentage / 100)) }}</td>
+            </tr>
+            <tr>
+                <td>100,000</td>
+                <td>{{ current_fees.markup_percentage }}%</td>
+                <td>{{ "{:,.0f}".format(100000 * (1 + current_fees.markup_percentage / 100)) }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

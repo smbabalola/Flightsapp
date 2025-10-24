@@ -1,0 +1,19 @@
+﻿# ERD - SureFlights (Mermaid)
+
+graph TD
+  C[customers] --> T[travelers]
+  Q[quotes] --> P[payments]
+  Q --> R[trips]
+  R --> A[ancillaries]
+  U[users] --> L[audit_logs]
+
+  C:::table
+  T:::table
+  Q:::table
+  P:::table
+  R:::table
+  A:::table
+  U:::table
+  L:::table
+
+classDef table fill:#eef,stroke:#99f,stroke-width:1px;

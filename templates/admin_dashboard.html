@@ -1,0 +1,74 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>Total Bookings</h3>
+        <div class="value">{{ total_bookings }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Paid Bookings</h3>
+        <div class="value">{{ paid_bookings }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Pending Payment</h3>
+        <div class="value">{{ pending_bookings }}</div>
+    </div>
+    <div class="stat-card revenue">
+        <h3>Total Revenue</h3>
+        <div class="value">₦{{ "%.2f"|format(total_revenue) }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Today's Bookings</h3>
+        <div class="value">{{ today_bookings }}</div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Recent Bookings</h2>
+    {% if recent_bookings %}
+    <table>
+        <thead>
+            <tr>
+                <th>PNR</th>
+                <th>Status</th>
+                <th>Amount</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in recent_bookings %}
+            <tr>
+                <td data-label="PNR"><strong>{{ booking.pnr or 'N/A' }}</strong></td>
+                <td data-label="Status">
+                    {% if booking.status == 'paid' %}
+                        <span class="badge success">Paid</span>
+                    {% elif booking.status == 'pending' %}
+                        <span class="badge warning">Pending</span>
+                    {% elif booking.status == 'ticketed' %}
+                        <span class="badge info">Ticketed</span>
+                    {% else %}
+                        <span class="badge">{{ booking.status }}</span>
+                    {% endif %}
+                </td>
+                <td data-label="Amount">₦{{ "%.2f"|format(booking.total_price_ngn or 0) }}</td>
+                <td data-label="Created">{{ booking.created_at[:19] if booking.created_at else 'N/A' }}</td>
+                <td data-label="Actions">
+                    <a href="/admin/trips/{{ booking.id }}" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.35rem 0.75rem;">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="text-align: center; color: #999; padding: 2rem;">No bookings yet</p>
+    {% endif %}
+
+    <div style="margin-top: 1.5rem;">
+        <a href="/admin/trips" class="btn btn-primary">View All Trips →</a>
+    </div>
+</div>
+{% endblock %}

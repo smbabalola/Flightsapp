@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancel Booking - SureFlights</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-light">
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="/" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: inherit;">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <path d="M16 2L28 16L16 30L4 16L16 2Z" fill="#2563eb"/>
+                    </svg>
+                    <span>SureFlights</span>
+                </a>
+            </div>
+            <div class="nav-links">
+                <label for="currencySelect" style="margin-right:0.5rem;">Currency</label>
+                <select id="currencySelect" class="nav-currency-select" style="margin-right:1rem;">
+                    <option value="NGN">NGN (â‚¦)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="GBP">GBP (Â£)</option>
+                    <option value="EUR">EUR (â‚¬)</option>
+                    <option value="ZAR">ZAR (R)</option>
+                </select>
+                <button type="button" id="themeToggle" class="btn btn-secondary btn-sm" style="margin-right: 0.75rem;">Toggle Theme</button>
+                <a href="dashboard.html">My Bookings</a>
+                <a href="#" id="logoutLink">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="booking-container" style="max-width: 800px;">
+        <div class="booking-card">
+            <h2 style="margin-bottom: 0.5rem;">Cancel Booking</h2>
+            <p style="color: var(--gray-600); margin-bottom: 2rem;">
+                We're sorry to see you go. Please review the cancellation policy before proceeding.
+            </p>
+
+            <div id="loadingSpinner" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Loading booking details...</p>
+            </div>
+
+            <div id="error" class="error-message" style="display: none;"></div>
+            <div id="success" class="success-message" style="display: none;"></div>
+
+            <!-- Booking Details -->
+            <div id="bookingDetails" style="display: none;">
+                <div style="background: var(--gray-50); padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 2rem;">
+                    <h3 style="margin-top: 0;">Booking Information</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">PNR</span>
+                        <span class="detail-value" id="pnr">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Route</span>
+                        <span class="detail-value" id="route">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Status</span>
+                        <span class="detail-value" id="status">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Total Paid</span>
+                        <span class="detail-value" id="totalPaid">-</span>
+                    </div>
+                </div>
+
+                <!-- Cancellation Fee Calculator -->
+                <div id="feeCalculator" style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 2rem;">
+                    <h3 style="margin-top: 0; color: #92400e;">Cancellation Policy</h3>
+                    <div id="feeBreakdown">
+                        <p style="margin-bottom: 1rem;">Calculating cancellation fees...</p>
+                    </div>
+                </div>
+
+                <!-- Cancellation Form -->
+                <form id="cancellationForm">
+                    <div class="form-group">
+                        <label for="reason">Reason for Cancellation *</label>
+                        <select id="reason" required>
+                            <option value="">Select a reason</option>
+                            <option value="change_of_plans">Change of plans</option>
+                            <option value="medical_emergency">Medical emergency</option>
+                            <option value="flight_schedule_conflict">Flight schedule conflict</option>
+                            <option value="found_cheaper">Found cheaper alternative</option>
+                            <option value="duplicate_booking">Duplicate booking</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <div class="form-error"></div>
+                    </div>
+
+                    <div class="form-group" id="otherReasonGroup" style="display: none;">
+                        <label for="otherReason">Please specify</label>
+                        <textarea id="otherReason" rows="3" placeholder="Please provide more details..."></textarea>
+                        <div class="form-error"></div>
+                    </div>
+
+                    <div style="background: #fee2e2; border-left: 4px solid #ef4444; padding: 1rem; border-radius: 0.5rem; margin: 1.5rem 0;">
+                        <p style="margin: 0; color: #991b1b; font-size: 0.875rem;">
+                            <strong>ÃƒÂ¢Ã…Â¡Ã‚Â ÃƒÂ¯Ã‚Â¸Ã‚Â Important:</strong> Cancellation requests are subject to review.
+                            Refunds will be processed within 5-10 business days after approval.
+                            Cancellation fees may apply based on airline policies.
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" id="confirmCheckbox" required>
+                            <span>I understand and agree to the cancellation policy</span>
+                        </label>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                            Back
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn" style="flex: 1; background-color: #ef4444;" disabled>
+                            Submit Cancellation Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>SureFlights</h3>
+                    <p>Your trusted partner for flight bookings worldwide</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <a href="contact.html">Help Center</a>
+                    <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--gray-600);">
+                        Need help? Contact us at<br>
+                        support@sureflights.com
+                    </p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 SureFlights. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script src="main.js"></script>
+    <script>
+        let tripId = null;
+        let tripData = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initThemeToggle();
+            updateNavigation();
+
+            // Check if user is logged in
+            if (!isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Get trip ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            tripId = urlParams.get('trip_id');
+
+            if (!tripId) {
+                showError('No booking specified. Please select a booking from your dashboard.');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
+                return;
+            }
+
+            loadBookingDetails();
+
+            // Enable validation
+            const form = document.getElementById('cancellationForm');
+            if (typeof enableRealTimeValidation === 'function') {
+                enableRealTimeValidation(form);
+            }
+
+            // Handle reason dropdown
+            document.getElementById('reason').addEventListener('change', (e) => {
+                const otherGroup = document.getElementById('otherReasonGroup');
+                if (e.target.value === 'other') {
+                    otherGroup.style.display = 'block';
+                    document.getElementById('otherReason').required = true;
+                } else {
+                    otherGroup.style.display = 'none';
+                    document.getElementById('otherReason').required = false;
+                }
+            });
+
+            // Enable submit button when checkbox is checked
+            document.getElementById('confirmCheckbox').addEventListener('change', (e) => {
+                document.getElementById('submitBtn').disabled = !e.target.checked;
+            });
+        });
+
+        async function loadBookingDetails() {
+            const spinner = document.getElementById('loadingSpinner');
+            const detailsDiv = document.getElementById('bookingDetails');
+            const errorDiv = document.getElementById('error');
+
+            spinner.style.display = 'block';
+            errorDiv.style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_BASE}/v1/trips/${tripId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load booking details');
+                }
+
+                tripData = await response.json();
+
+                // Check if booking can be cancelled
+                if (tripData.status === 'cancelled') {
+                    showError('This booking has already been cancelled.');
+                    setTimeout(() => window.location.href = 'dashboard.html', 2000);
+                    return;
+                }
+
+                displayBookingDetails(tripData);
+                calculateCancellationFee(tripData);
+
+                spinner.style.display = 'none';
+                detailsDiv.style.display = 'block';
+
+            } catch (error) {
+                console.error('Error loading booking:', error);
+                spinner.style.display = 'none';
+                showError('Failed to load booking details. Please try again.');
+            }
+        }
+
+        function displayBookingDetails(trip) {
+            document.getElementById('pnr').textContent = trip.pnr || 'N/A';
+            document.getElementById('route').textContent = trip.route_summary || 'N/A';
+            document.getElementById('status').textContent = trip.status || 'N/A';
+
+            const amount = trip.total_price_ngn || 0;
+            const currency = trip.currency || 'NGN';
+            const priceDisplay = currency === 'NGN' ? `ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¦${parseInt(amount).toLocaleString()}` : `${currency} ${amount}`;
+            document.getElementById('totalPaid').textContent = priceDisplay;
+        }
+
+        function calculateCancellationFee(trip) {
+            const feeDiv = document.getElementById('feeBreakdown');
+            const totalAmount = trip.total_price_ngn || 0;
+            const currency = trip.currency || 'NGN';
+
+            // Simple cancellation fee calculation (20% fee)
+            const cancellationFeePercent = 20;
+            const cancellationFee = totalAmount * (cancellationFeePercent / 100);
+            const refundAmount = totalAmount - cancellationFee;
+
+            const formatAmount = (amt) => {
+                return currency === 'NGN' ? `ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¦${parseInt(amt).toLocaleString()}` : `${currency} ${amt.toFixed(2)}`;
+            };
+
+            feeDiv.innerHTML = `
+                <div style="margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0;">
+                        <span>Original Amount:</span>
+                        <strong>${formatAmount(totalAmount)}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; color: #dc2626;">
+                        <span>Cancellation Fee (${cancellationFeePercent}%):</span>
+                        <strong>-${formatAmount(cancellationFee)}</strong>
+                    </div>
+                    <div style="border-top: 2px solid #92400e; margin-top: 0.5rem; padding-top: 0.5rem;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="font-size: 1.125rem;"><strong>Refund Amount:</strong></span>
+                            <strong style="font-size: 1.25rem; color: #15803d;">${formatAmount(refundAmount)}</strong>
+                        </div>
+                    </div>
+                </div>
+                <p style="font-size: 0.875rem; margin: 0; color: #92400e;">
+                    <strong>Note:</strong> Actual refund amount may vary based on airline policies and timing of cancellation.
+                </p>
+            `;
+        }
+
+        document.getElementById('cancellationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Validate form
+            if (typeof validateForm === 'function' && !validateForm(e.target)) {
+                return;
+            }
+
+            const reason = document.getElementById('reason').value;
+            const otherReason = document.getElementById('otherReason').value;
+            const finalReason = reason === 'other' ? otherReason : reason;
+
+            const submitBtn = document.getElementById('submitBtn');
+            const errorDiv = document.getElementById('error');
+            const successDiv = document.getElementById('success');
+
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            try {
+                const response = await fetch(`${API_BASE}/v1/cancellations`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify({
+                        trip_id: parseInt(tripId),
+                        reason: finalReason
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    successDiv.innerHTML = `
+                        <strong>Cancellation Request Submitted!</strong><br>
+                        Your cancellation request (ID: ${data.cancellation_id}) has been received and is being processed.
+                        You will receive a confirmation email shortly.
+                    `;
+                    successDiv.style.display = 'block';
+
+                    // Hide form
+                    document.getElementById('cancellationForm').style.display = 'none';
+
+                    // Redirect to dashboard after 3 seconds
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 3000);
+                } else {
+                    showError(data.detail || 'Failed to submit cancellation request. Please try again.');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit Cancellation Request';
+                }
+            } catch (error) {
+                console.error('Error submitting cancellation:', error);
+                showError('Network error. Please check your connection and try again.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Cancellation Request';
+            }
+        });
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

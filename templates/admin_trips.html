@@ -1,0 +1,91 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Trips Management{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2>All Trips</h2>
+        <div style="display: flex; gap: 1rem;">
+            <select onchange="window.location.href='/admin/trips?status=' + this.value" style="padding: 0.5rem;">
+                <option value="">All Status</option>
+                <option value="paid" {% if status_filter == 'paid' %}selected{% endif %}>Paid</option>
+                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                <option value="ticketed" {% if status_filter == 'ticketed' %}selected{% endif %}>Ticketed</option>
+            </select>
+        </div>
+    </div>
+
+    {% if trips %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>PNR</th>
+                <th>Route</th>
+                <th>Status</th>
+                <th>Amount</th>
+                <th>Payment Ref</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for trip in trips %}
+            <tr>
+                <td data-label="ID">{{ trip.id }}</td>
+                <td data-label="PNR"><strong>{{ trip.pnr or 'N/A' }}</strong></td>
+                <td data-label="Route">{{ trip.route_summary or 'N/A' }}</td>
+                <td data-label="Status">
+                    {% if trip.status == 'paid' %}
+                        <span class="badge success">Paid</span>
+                    {% elif trip.status == 'pending' %}
+                        <span class="badge warning">Pending</span>
+                    {% elif trip.status == 'ticketed' %}
+                        <span class="badge info">Ticketed</span>
+                    {% else %}
+                        <span class="badge">{{ trip.status }}</span>
+                    {% endif %}
+                </td>
+                <td data-label="Amount">
+                    {% if trip.currency == 'NGN' %}
+                        ₦{{ "%.2f"|format(trip.total_price_ngn or 0) }}
+                    {% else %}
+                        {{ trip.currency }} {{ "%.2f"|format(trip.total_price_ngn or 0) }}
+                    {% endif %}
+                </td>
+                <td data-label="Payment Ref">{{ trip.paystack_reference or '-' }}</td>
+                <td data-label="Created">{{ trip.created_at[:10] if trip.created_at else 'N/A' }}</td>
+                <td data-label="Actions">
+                    <a href="/admin/trips/{{ trip.id }}" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.35rem 0.75rem;">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if total_pages > 1 %}
+    <div class="pagination">
+        {% if page > 1 %}
+            <a href="/admin/trips?page={{ page - 1 }}{% if status_filter %}&status={{ status_filter }}{% endif %}">← Previous</a>
+        {% endif %}
+
+        {% for p in range(1, total_pages + 1) %}
+            {% if p == page %}
+                <a href="#" class="active">{{ p }}</a>
+            {% elif p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
+                <a href="/admin/trips?page={{ p }}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ p }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page < total_pages %}
+            <a href="/admin/trips?page={{ page + 1 }}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next →</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <p style="text-align: center; color: #999; padding: 2rem;">No trips found</p>
+    {% endif %}
+</div>
+{% endblock %}

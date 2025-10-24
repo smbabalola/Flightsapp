@@ -1,0 +1,15 @@
+﻿{
+  "info": {"name": "SureFlights API (Local)", "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"},
+  "item": [
+    {"name": "Health", "request": {"method": "GET", "url": "{{baseUrl}}/health"}},
+    {"name": "Root", "request": {"method": "GET", "url": "{{baseUrl}}/"}},
+    {"name": "Metrics", "request": {"method": "GET", "url": "{{baseUrl}}/metrics"}},
+    {"name": "Search", "request": {"method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body":{"mode":"raw","raw":"{\n  \"slices\": [{\"from_\": \"LOS\", \"to\": \"ABV\", \"date\": \"2025-11-05\"}],\n  \"adults\": 1, \"children\": 0, \"infants\": 0, \"cabin\": \"economy\"\n}"}, "url": "{{baseUrl}}/v1/search"}},
+    {"name": "Offer Price", "request": {"method": "POST", "url": "{{baseUrl}}/v1/offers/{{offer_id}}/price"}},
+    {"name": "Book", "request": {"method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body":{"mode":"raw","raw":"{\n  \"offer_id\": \"duffel_mock_1\",\n  \"passengers\": [{\n    \"type\": \"adult\", \"first\": \"Ada\", \"last\": \"Okafor\", \"dob\": \"1995-05-01\",\n    \"passport\": {\"number_token\": \"tok_1234\", \"expiry\": \"2031-01-01\", \"nationality\": \"NG\"}}],\n  \"contacts\": {\"email\": \"ada@example.com\", \"phone\": \"+2348012345678\"},\n  \"channel\": \"whatsapp\"\n}"}, "url": "{{baseUrl}}/v1/book"}},
+    {"name": "Paystack Webhook (charge.success)", "request": {"method": "POST", "header": [{"key":"X-Paystack-Signature","value":"{{paystack_signature}}"},{"key":"Content-Type","value":"application/json"}], "body":{"mode":"raw","raw":"{\n  \"event\": \"charge.success\",\n  \"data\": {\"reference\": \"{{reference}}\"}\n}"}, "url": "{{baseUrl}}/webhooks/paystack"}},
+    {"name": "Get Trip", "request": {"method": "GET", "url": "{{baseUrl}}/v1/trips/{{trip_id}}"}},
+    {"name": "Payment Status", "request": {"method": "GET", "url": "{{baseUrl}}/v1/payments/{{reference}}"}},
+    {"name": "Ops Trips (Basic Auth)", "request": {"auth":{"type":"basic","basic":[{"key":"username","value":"{{admin_user}}","type":"string"},{"key":"password","value":"{{admin_pass}}","type":"string"}]}, "method": "GET", "url": "{{baseUrl}}/v1/ops/trips"}}
+  ]
+}

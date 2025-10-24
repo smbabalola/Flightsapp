@@ -1,0 +1,21 @@
+{% extends "admin_base.html" %}
+{% block title %}SMTP Settings{% endblock %}
+{% block content %}
+{% if request.query_params.get('updated') %}
+<div class="alert alert-success">✓ SMTP settings saved</div>
+{% endif %}
+<div class="card">
+  <h2>SMTP Settings</h2>
+  <form method="POST" action="/admin/smtp" style="max-width:720px;">
+    <div class="form-group"><label>Host</label><input type="text" name="host" value="{{ s.host or '' }}"></div>
+    <div class="form-group"><label>Port</label><input type="number" name="port" value="{{ s.port or 587 }}"></div>
+    <div class="form-group"><label>User</label><input type="text" name="user" value="{{ s.user or '' }}"></div>
+    <div class="form-group"><label>Password</label><input type="password" name="password" value="{{ s.password or '' }}"></div>
+    <div class="form-group"><label>From Email</label><input type="email" name="from_email" value="{{ s.from_email or '' }}"></div>
+    <div class="form-group"><label>From Name</label><input type="text" name="from_name" value="{{ s.from_name or '' }}"></div>
+    <div class="form-group"><label><input type="checkbox" name="use_tls" {% if s.use_tls %}checked{% endif %}> Use TLS</label></div>
+    <button class="btn btn-success" type="submit">Save</button>
+  </form>
+</div>
+{% endblock %}
+

@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: sureflights
+          POSTGRES_PASSWORD: sureflights_dev_password
+          POSTGRES_DB: sureflights
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sureflights" 
+          --health-interval 10s 
+          --health-timeout 5s 
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://sureflights:sureflights_dev_password@localhost:5432/sureflights
+      ENV: ci
+      USE_REAL_DUFFEL: false
+      USE_REAL_PAYSTACK: false
+      USE_REDIS_IDEMPOTENCY: false
+      USE_LIVE_FX_RATES: false
+      FX_NGN_RATE: 1650
+      BASE_PRICING_CURRENCY: USD
+      DEFAULT_DISPLAY_CURRENCY: NGN
+      FX_SAFETY_MARGIN_PCT: 4.0
+      ADMIN_USER: admin
+      ADMIN_PASS: admin
+      IGNORE_DOMESTIC_ROUTES: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Alembic migrations
+        run: |
+          alembic upgrade head
+
+      - name: Launch API server
+        run: |
+          nohup uvicorn app.main:app --host 127.0.0.1 --port 8001 &
+          for i in {1..30}; do
+            curl -fsS http://127.0.0.1:8001/health && break || sleep 1;
+          done
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright deps
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        run: |
+          BASE_URL=http://127.0.0.1:8001 HEADLESS=true npm test --silent
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results
+
+      - name: Print Allure summary
+        if: always()
+        run: |
+          echo "Allure results files:"
+          ls -la allure-results || true

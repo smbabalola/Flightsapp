@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmed - SureFlights</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="/" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: inherit;">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <path d="M16 2L28 16L16 30L4 16L16 2Z" fill="#2563eb"/>
+                    </svg>
+                    <span>SureFlights</span>
+                </a>
+            </div>
+            <div class="nav-links">
+                <label for="currencySelect" style="margin-right:0.5rem;">Currency</label>
+                <select id="currencySelect" class="nav-currency-select" style="margin-right:1rem;">
+                    <option value="NGN">NGN (₦)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="GBP">GBP (£)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="ZAR">ZAR (R)</option>
+                </select>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+                <a href="dashboard.html" id="dashboardLink" style="display: none;">My Bookings</a>
+                <a href="login.html" id="loginLink">Login</a>
+                <a href="signup.html" id="signupLink" class="btn btn-primary btn-sm">Sign Up</a>
+                <a href="#" id="logoutLink" style="display: none;">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="confirmation-container">
+        <div style="text-align: center;">
+            <div class="success-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h1 style="margin-bottom: 0.5rem;">Booking Confirmed!</h1>
+            <p style="color: var(--gray-600); margin-bottom: 3rem;">Your payment was successful and your booking is confirmed.</p>
+        </div>
+
+        <div class="confirmation-details">
+            <h3 style="margin-bottom: 1.5rem;">Booking Details</h3>
+
+            <div id="bookingDetails">
+                <div class="detail-row">
+                    <span class="detail-label">Booking Reference</span>
+                    <span class="detail-value" id="reference">Loading...</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">PNR</span>
+                    <span class="detail-value" id="pnr">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">E-Tickets</span>
+                    <span class="detail-value" id="etickets">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Email</span>
+                    <span class="detail-value" id="email">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Phone</span>
+                    <span class="detail-value" id="phone">-</span>
+                </div>
+            </div>
+
+            <div style="background: var(--gray-50); padding: 1rem; border-radius: 0.5rem; margin-top: 2rem;">
+                <p style="font-size: 0.875rem; color: var(--gray-700); margin: 0;">
+                    Ã¢Å“â€°Ã¯Â¸Â A confirmation email with your e-ticket has been sent to your registered email address.
+                </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 2rem;">
+                <button onclick="downloadPDF()" class="btn btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+                        <path d="M3 17V19H17V17M10 3V15M10 15L6 11M10 15L14 11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Download E-Ticket
+                </button>
+
+                <button onclick="addToCalendar()" class="btn btn-secondary" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+                        <rect x="3" y="4" width="14" height="14" rx="2" stroke-width="2"/>
+                        <path d="M7 2V6M13 2V6M3 8H17" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    Add to Calendar
+                </button>
+
+                <button onclick="printItinerary()" class="btn btn-secondary" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+                        <path d="M5 7H4C2.89543 7 2 7.89543 2 9V13C2 14.1046 2.89543 15 4 15H5M15 7H16C17.1046 7 18 7.89543 18 9V13C18 14.1046 17.1046 15 16 15H15M5 7V3H15V7M5 7V17H15V7" stroke-width="2"/>
+                    </svg>
+                    Print Itinerary
+                </button>
+
+                <button onclick="shareBoopting()" class="btn btn-secondary" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+                        <path d="M15 6L9 12L15 18M4 6L10 12L4 18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Share
+                </button>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="dashboard.html" class="btn btn-secondary" style="margin-right: 1rem;">
+                View My Bookings
+            </a>
+            <a href="index.html" class="btn btn-primary">
+                Book Another Flight
+            </a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>SureFlights</h3>
+                    <p>Your trusted partner for flight bookings worldwide</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="/">Home</a>
+                    <a href="about.html">About Us</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Account</h4>
+                    <a href="login.html" id="footerLogin">Login</a>
+                    <a href="signup.html" id="footerSignup">Sign Up</a>
+                    <a href="dashboard.html" id="footerDashboard" style="display: none;">My Bookings</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <a href="contact.html">Help Center</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Privacy Policy</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 SureFlights. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script>
+        let currentTrip = null;
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const reference = getQueryParam('reference');
+            const tripId = getQueryParam('trip_id');
+
+            if (!reference) {
+                // Try to get from session storage
+                const storedRef = sessionStorage.getItem('bookingReference');
+                if (storedRef) {
+                    document.getElementById('reference').textContent = storedRef;
+                } else {
+                    document.getElementById('reference').textContent = 'N/A';
+                }
+                return;
+            }
+
+            // Display reference
+            document.getElementById('reference').textContent = reference;
+
+            // Fetch trip details if trip_id is available
+            if (tripId) {
+                try {
+                    const response = await fetch(`/v1/trips/${tripId}`);
+                    if (response.ok) {
+                        currentTrip = await response.json();
+                        displayTripDetails(currentTrip);
+                    }
+                } catch (error) {
+                    console.error('Error fetching trip details:', error);
+                }
+            }
+
+            // Clear session storage
+            sessionStorage.clear();
+        });
+
+        function displayTripDetails(trip) {
+            if (trip.pnr) {
+                document.getElementById('pnr').textContent = trip.pnr;
+            }
+
+            if (trip.etickets && trip.etickets.length > 0) {
+                document.getElementById('etickets').textContent = trip.etickets.join(', ');
+            }
+
+            if (trip.email) {
+                document.getElementById('email').textContent = trip.email;
+            }
+
+            if (trip.phone) {
+                document.getElementById('phone').textContent = trip.phone;
+            }
+        }
+
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Download E-Ticket as PDF
+        function downloadPDF() {
+            const pnr = document.getElementById('pnr').textContent;
+            const reference = document.getElementById('reference').textContent;
+            const etickets = document.getElementById('etickets').textContent;
+            const email = document.getElementById('email').textContent;
+
+            // Create a simple text-based e-ticket
+            const content = `
+SUREFLIGHTS E-TICKET
+Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
+
+Booking Reference: ${reference}
+PNR: ${pnr}
+E-Tickets: ${etickets}
+Email: ${email}
+
+Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
+IMPORTANT NOTICE:
+Ã¢â‚¬Â¢ Please arrive at the airport at least 2 hours before departure
+Ã¢â‚¬Â¢ Present this e-ticket at check-in
+Ã¢â‚¬Â¢ Valid photo ID required
+
+Thank you for choosing SureFlights!
+For support: support@sureflights.com
+Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
+            `;
+
+            // Create download
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `SureFlights-E-Ticket-${pnr}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            // Show confirmation
+            alert('E-Ticket downloaded successfully!');
+        }
+
+        // Add to Calendar (iCal format)
+        function addToCalendar() {
+            const pnr = document.getElementById('pnr').textContent;
+            const reference = document.getElementById('reference').textContent;
+            const email = document.getElementById('email').textContent;
+
+            // Create a sample flight date (you'd get this from trip data)
+            const now = new Date();
+            const flightDate = new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000)); // 7 days from now
+
+            const formatDate = (date) => {
+                return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            };
+
+            const icalContent = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//SureFlights//Booking//EN',
+                'BEGIN:VEVENT',
+                `UID:${reference}@sureflights.com`,
+                `DTSTAMP:${formatDate(now)}`,
+                `DTSTART:${formatDate(flightDate)}`,
+                `DTEND:${formatDate(new Date(flightDate.getTime() + (2 * 60 * 60 * 1000)))}`, // 2 hours later
+                `SUMMARY:Flight - ${pnr}`,
+                `DESCRIPTION:SureFlights Booking\\nPNR: ${pnr}\\nReference: ${reference}\\n\\nPlease arrive 2 hours before departure.`,
+                `LOCATION:Airport`,
+                'STATUS:CONFIRMED',
+                'SEQUENCE:0',
+                'BEGIN:VALARM',
+                'TRIGGER:-PT24H',
+                'DESCRIPTION:Flight Reminder - Check in online',
+                'ACTION:DISPLAY',
+                'END:VALARM',
+                'END:VEVENT',
+                'END:VCALENDAR'
+            ].join('\r\n');
+
+            // Create download
+            const blob = new Blob([icalContent], { type: 'text/calendar;charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `SureFlights-${pnr}.ics`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            alert('Calendar event file downloaded! Open it to add to your calendar.');
+        }
+
+        // Print Itinerary
+        function printItinerary() {
+            window.print();
+        }
+
+        // Share Booking
+        function shareBoopting() {
+            const pnr = document.getElementById('pnr').textContent;
+            const reference = document.getElementById('reference').textContent;
+            const shareText = `My SureFlights booking is confirmed! PNR: ${pnr}, Reference: ${reference}`;
+            const shareUrl = window.location.href;
+
+            // Try to use Web Share API if available
+            if (navigator.share) {
+                navigator.share({
+                    title: 'SureFlights Booking',
+                    text: shareText,
+                    url: shareUrl
+                }).catch(err => console.log('Share canceled'));
+            } else {
+                // Fallback: Copy to clipboard
+                navigator.clipboard.writeText(shareText + '\n' + shareUrl)
+                    .then(() => alert('Booking details copied to clipboard!'))
+                    .catch(() => alert(`Share this link: ${shareUrl}`));
+            }
+        }
+    </script>
+
+    <!-- Print-specific styles -->
+    <style media="print">
+        .navbar, .footer, .btn, button {
+            display: none !important;
+        }
+
+        .confirmation-container {
+            padding: 0;
+            max-width: 100%;
+        }
+
+        .confirmation-details {
+            border: 1px solid #000;
+            padding: 20px;
+        }
+
+        @page {
+            margin: 1cm;
+        }
+    </style>
+</body>
+</html>

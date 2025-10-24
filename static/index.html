@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SureFlights - Find and Book Cheap Flights</title>
+    <meta name="description" content="Compare and book cheap flights with SureFlights. Search hundreds of airlines for the best deals on international and domestic flights.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/tailwind-custom.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-white">
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="container mx-auto">
+            <div class="flex justify-between items-center py-4">
+                <a href="/" class="flex items-center gap-2 no-underline">
+                    <img src="images/logo.png" width="40" height="40" alt="SureFlights Logo" class="object-contain">
+                    <span class="text-2xl font-bold" style="color: var(--brand-primary);">SureFlights</span>
+                </a>
+
+                <div class="hidden md:flex items-center gap-6">
+                    <button type="button" id="themeToggle" class="p-2 rounded-lg hover:bg-gray-100 transition-colors" title="Toggle theme">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                        </svg>
+                    </button>
+
+                    <div class="flex items-center gap-2">
+                        <select id="currencySelect" class="border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium hover:border-gray-400 transition-colors cursor-pointer">
+                            <option value="NGN">NGN (₦)</option>
+                            <option value="USD">USD ($)</option>
+                            <option value="GBP">GBP (£)</option>
+                            <option value="EUR">EUR (€)</option>
+                            <option value="ZAR">ZAR (R)</option>
+                        </select>
+                    </div>
+
+                    <a href="about.html" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">About</a>
+                    <a href="contact.html" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Contact</a>
+                    <a href="dashboard.html" id="dashboardLink" class="hidden text-gray-700 hover:text-blue-600 font-medium transition-colors">My Bookings</a>
+                    <a href="login.html" id="loginLink" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Login</a>
+                    <a href="signup.html" id="signupLink" class="btn-primary text-sm">Sign Up</a>
+                    <button id="logoutLink" class="hidden text-gray-700 hover:text-blue-600 font-medium transition-colors">Logout</button>
+                </div>
+
+                <!-- Mobile menu button -->
+                <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-gray-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Mobile menu -->
+            <div id="mobileMenu" class="hidden md:hidden py-4 border-t border-gray-200">
+                <div class="flex flex-col gap-4">
+                    <a href="about.html" class="text-gray-700 hover:text-blue-600 font-medium">About</a>
+                    <a href="contact.html" class="text-gray-700 hover:text-blue-600 font-medium">Contact</a>
+                    <a href="dashboard.html" id="dashboardLinkMobile" class="hidden text-gray-700 hover:text-blue-600 font-medium">My Bookings</a>
+                    <a href="login.html" id="loginLinkMobile" class="text-gray-700 hover:text-blue-600 font-medium">Login</a>
+                    <a href="signup.html" id="signupLinkMobile" class="text-blue-600 font-semibold">Sign Up</a>
+                    <button id="logoutLinkMobile" class="hidden text-left text-gray-700 hover:text-blue-600 font-medium">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Search -->
+    <main>
+        <div class="relative bg-gradient-to-br from-blue-50 via-white to-blue-50">
+            <div class="container mx-auto py-12 md:py-20">
+                <div class="text-center mb-8 animate-fade-in">
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4">
+                        Find your next adventure
+                    </h1>
+                    <p class="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
+                        Compare flights from hundreds of airlines and travel agents to find the best deals
+                    </p>
+                </div>
+
+                <!-- Search Card -->
+                <div class="max-w-5xl mx-auto">
+                    <div class="card p-6 md:p-8 animate-slide-up">
+                        <div class="mb-6">
+                            <div class="inline-flex rounded-lg border border-gray-200 p-1">
+                                <button type="button" id="returnTripBtn" class="px-6 py-2 rounded-md font-medium transition-colors btn-primary">
+                                    Return
+                                </button>
+                                <button type="button" id="oneWayBtn" class="px-6 py-2 rounded-md font-medium text-gray-700 hover:text-blue-600 transition-colors">
+                                    One-way
+                                </button>
+                            </div>
+                        </div>
+
+                        <form id="searchForm" class="space-y-4">
+                            <!-- From and To -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="relative">
+                                    <label for="from" class="block text-sm font-semibold text-gray-700 mb-2">From</label>
+                                    <div class="relative">
+                                        <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                        <input type="text" id="from" name="from" required
+                                            class="input-field pl-12 w-full text-lg"
+                                            placeholder="Airport or city">
+                                        <div id="fromSuggestions" class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto"></div>
+                                    </div>
+                                </div>
+
+                                <div class="relative">
+                                    <label for="to" class="block text-sm font-semibold text-gray-700 mb-2">To</label>
+                                    <div class="relative">
+                                        <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                        <input type="text" id="to" name="to" required
+                                            class="input-field pl-12 w-full text-lg"
+                                            placeholder="Airport or city">
+                                        <div id="toSuggestions" class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Dates and Passengers -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="departDate" class="block text-sm font-semibold text-gray-700 mb-2">Departure</label>
+                                    <input type="date" id="departDate" name="departDate" required
+                                        class="input-field w-full">
+                                </div>
+
+                                <div id="returnDateContainer">
+                                    <label for="returnDate" class="block text-sm font-semibold text-gray-700 mb-2">Return</label>
+                                    <input type="date" id="returnDate" name="returnDate"
+                                        class="input-field w-full">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Passengers & Class</label>
+                                    <button type="button" id="passengersBtn"
+                                        class="input-field w-full text-left flex justify-between items-center">
+                                        <span id="passengerSummary">1 Adult, Economy</span>
+                                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                    </button>
+
+                                    <!-- Passengers Dropdown -->
+                                    <div id="passengersDropdown" class="hidden absolute z-20 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl p-6 w-80">
+                                        <div class="space-y-4">
+                                            <div class="flex justify-between items-center">
+                                                <div>
+                                                    <div class="font-semibold">Adults</div>
+                                                    <div class="text-sm text-gray-500">16+ years</div>
+                                                </div>
+                                                <div class="flex items-center gap-3">
+                                                    <button type="button" id="adultsDown" class="w-8 h-8 rounded-full border border-gray-300 hover:border-blue-600 transition-colors">-</button>
+                                                    <span id="adultsCount" class="w-8 text-center font-semibold">1</span>
+                                                    <button type="button" id="adultsUp" class="w-8 h-8 rounded-full border border-gray-300 hover:border-blue-600 transition-colors">+</button>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex justify-between items-center">
+                                                <div>
+                                                    <div class="font-semibold">Children</div>
+                                                    <div class="text-sm text-gray-500">2-15 years</div>
+                                                </div>
+                                                <div class="flex items-center gap-3">
+                                                    <button type="button" id="childrenDown" class="w-8 h-8 rounded-full border border-gray-300 hover:border-blue-600 transition-colors">-</button>
+                                                    <span id="childrenCount" class="w-8 text-center font-semibold">0</span>
+                                                    <button type="button" id="childrenUp" class="w-8 h-8 rounded-full border border-gray-300 hover:border-blue-600 transition-colors">+</button>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex justify-between items-center">
+                                                <div>
+                                                    <div class="font-semibold">Infants</div>
+                                                    <div class="text-sm text-gray-500">Under 2 years</div>
+                                                </div>
+                                                <div class="flex items-center gap-3">
+                                                    <button type="button" id="infantsDown" class="w-8 h-8 rounded-full border border-gray-300 hover:border-blue-600 transition-colors">-</button>
+                                                    <span id="infantsCount" class="w-8 text-center font-semibold">0</span>
+                                                    <button type="button" id="infantsUp" class="w-8 h-8 rounded-full border border-gray-300 hover:border-blue-600 transition-colors">+</button>
+                                                </div>
+                                            </div>
+
+                                            <div class="pt-4 border-t border-gray-200">
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2">Cabin class</label>
+                                                <select id="cabinClass" class="input-field w-full">
+                                                    <option value="economy">Economy</option>
+                                                    <option value="premium_economy">Premium Economy</option>
+                                                    <option value="business">Business</option>
+                                                    <option value="first">First Class</option>
+                                                </select>
+                                            </div>
+
+                                            <button type="button" id="passengersDone" class="btn-primary w-full">Done</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Search Button -->
+                            <div class="pt-4">
+                                <button type="submit" id="searchBtn" class="btn-primary w-full md:w-auto px-12 py-4 text-lg">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                    Search Flights
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <section class="py-16 bg-white">
+            <div class="container mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Why choose SureFlights?</h2>
+                    <p class="text-lg text-gray-600">We make finding and booking flights simple and affordable</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="text-center p-6">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4">
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Best Prices</h3>
+                        <p class="text-gray-600">Compare hundreds of airlines to find the best deals for your trip</p>
+                    </div>
+
+                    <div class="text-center p-6">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
+                            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Easy Booking</h3>
+                        <p class="text-gray-600">Simple and secure booking process with instant confirmation</p>
+                    </div>
+
+                    <div class="text-center p-6">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-100 mb-4">
+                            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">24/7 Support</h3>
+                        <p class="text-gray-600">Our support team is always here to help you with any questions</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trust Indicators -->
+        <section class="py-12 bg-gray-50">
+            <div class="container mx-auto">
+                <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-gray-900">500K+</div>
+                        <div class="text-gray-600">Happy Travelers</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-gray-900">200+</div>
+                        <div class="text-gray-600">Airlines</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-gray-900">150+</div>
+                        <div class="text-gray-600">Countries</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-gray-900">24/7</div>
+                        <div class="text-gray-600">Support</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>SureFlights</h3>
+                    <p>Your trusted partner for finding and booking the best flight deals worldwide.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="/">Home</a>
+                    <a href="about.html">About Us</a>
+                    <a href="contact.html">Contact</a>
+                    <a href="terms-of-service.html">Terms of Service</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Account</h4>
+                    <a href="login.html" id="footerLogin">Login</a>
+                    <a href="signup.html" id="footerSignup">Sign Up</a>
+                    <a href="dashboard.html" id="footerDashboard" style="display:none;">My Bookings</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <a href="contact.html">Help Center</a>
+                    <a href="contact.html">Customer Service</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 SureFlights. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script src="main.js"></script>
+    <script>
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            initThemeToggle();
+            updateNavigation();
+            initSearchForm();
+            setMinDate();
+        });
+
+        // Mobile menu toggle
+        document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        });
+
+        // Set minimum date to today
+        function setMinDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('departDate').setAttribute('min', today);
+            document.getElementById('returnDate').setAttribute('min', today);
+        }
+
+        // Trip type toggle
+        let isReturn = true;
+        document.getElementById('returnTripBtn')?.addEventListener('click', function() {
+            isReturn = true;
+            this.classList.add('btn-primary');
+            this.classList.remove('text-gray-700');
+            document.getElementById('oneWayBtn').classList.remove('btn-primary');
+            document.getElementById('oneWayBtn').classList.add('text-gray-700');
+            document.getElementById('returnDateContainer').style.display = 'block';
+            document.getElementById('returnDate').required = true;
+        });
+
+        document.getElementById('oneWayBtn')?.addEventListener('click', function() {
+            isReturn = false;
+            this.classList.add('btn-primary');
+            this.classList.remove('text-gray-700');
+            document.getElementById('returnTripBtn').classList.remove('btn-primary');
+            document.getElementById('returnTripBtn').classList.add('text-gray-700');
+            document.getElementById('returnDateContainer').style.display = 'none';
+            document.getElementById('returnDate').required = false;
+        });
+
+        // Passengers dropdown
+        let adults = 1, children = 0, infants = 0;
+
+        document.getElementById('passengersBtn')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('passengersDropdown').classList.toggle('hidden');
+        });
+
+        document.getElementById('adultsDown')?.addEventListener('click', () => {
+            if (adults > 1) {
+                adults--;
+                updatePassengerCount();
+            }
+        });
+
+        document.getElementById('adultsUp')?.addEventListener('click', () => {
+            if (adults < 9) {
+                adults++;
+                updatePassengerCount();
+            }
+        });
+
+        document.getElementById('childrenDown')?.addEventListener('click', () => {
+            if (children > 0) {
+                children--;
+                updatePassengerCount();
+            }
+        });
+
+        document.getElementById('childrenUp')?.addEventListener('click', () => {
+            if (children < 9) {
+                children++;
+                updatePassengerCount();
+            }
+        });
+
+        document.getElementById('infantsDown')?.addEventListener('click', () => {
+            if (infants > 0) {
+                infants--;
+                updatePassengerCount();
+            }
+        });
+
+        document.getElementById('infantsUp')?.addEventListener('click', () => {
+            if (infants < adults) {
+                infants++;
+                updatePassengerCount();
+            }
+        });
+
+        document.getElementById('passengersDone')?.addEventListener('click', () => {
+            updatePassengerSummary();
+            document.getElementById('passengersDropdown').classList.add('hidden');
+        });
+
+        function updatePassengerCount() {
+            document.getElementById('adultsCount').textContent = adults;
+            document.getElementById('childrenCount').textContent = children;
+            document.getElementById('infantsCount').textContent = infants;
+        }
+
+        function updatePassengerSummary() {
+            const cabin = document.getElementById('cabinClass').value;
+            const cabinNames = {
+                economy: 'Economy',
+                premium_economy: 'Premium Economy',
+                business: 'Business',
+                first: 'First Class'
+            };
+            const total = adults + children + infants;
+            const summary = `${total} ${total === 1 ? 'Passenger' : 'Passengers'}, ${cabinNames[cabin]}`;
+            document.getElementById('passengerSummary').textContent = summary;
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            const passengersBtn = document.getElementById('passengersBtn');
+            const passengersDropdown = document.getElementById('passengersDropdown');
+
+            if (passengersBtn && passengersDropdown &&
+                !passengersBtn.contains(e.target) &&
+                !passengersDropdown.contains(e.target)) {
+                passengersDropdown.classList.add('hidden');
+            }
+        });
+
+        function initSearchForm() {
+            const form = document.getElementById('searchForm');
+            const fromInput = document.getElementById('from');
+            const toInput = document.getElementById('to');
+            const fromSuggestions = document.getElementById('fromSuggestions');
+            const toSuggestions = document.getElementById('toSuggestions');
+
+            let airportsCache = [];
+
+            // Fetch airports on load
+            fetchAirports();
+
+            async function fetchAirports() {
+                try {
+                    const res = await fetch(`${API_BASE}/v1/metadata/airports`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        airportsCache = data.airports || [];
+                    }
+                } catch (err) {
+                    console.error('Failed to load airports:', err);
+                }
+            }
+
+            // Airport autocomplete
+            fromInput.addEventListener('input', (e) => {
+                showSuggestions(e.target.value, fromSuggestions, fromInput);
+            });
+
+            toInput.addEventListener('input', (e) => {
+                showSuggestions(e.target.value, toSuggestions, toInput);
+            });
+
+            function showSuggestions(query, suggestionsEl, inputEl) {
+                if (query.length < 2) {
+                    suggestionsEl.classList.add('hidden');
+                    return;
+                }
+
+                const filtered = airportsCache.filter(airport => {
+                    const searchStr = `${airport.name} ${airport.city_name || ''} ${airport.iata_code}`.toLowerCase();
+                    return searchStr.includes(query.toLowerCase());
+                }).slice(0, 8);
+
+                if (filtered.length === 0) {
+                    suggestionsEl.classList.add('hidden');
+                    return;
+                }
+
+                suggestionsEl.innerHTML = filtered.map(airport => `
+                    <div class="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0" data-code="${airport.iata_code}">
+                        <div class="font-semibold text-gray-900">${airport.iata_code} - ${airport.name}</div>
+                        <div class="text-sm text-gray-600">${airport.city_name || ''}</div>
+                    </div>
+                `).join('');
+
+                suggestionsEl.querySelectorAll('[data-code]').forEach(el => {
+                    el.addEventListener('click', () => {
+                        inputEl.value = el.dataset.code;
+                        suggestionsEl.classList.add('hidden');
+                    });
+                });
+
+                suggestionsEl.classList.remove('hidden');
+            }
+
+            // Close suggestions when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!fromInput.contains(e.target) && !fromSuggestions.contains(e.target)) {
+                    fromSuggestions.classList.add('hidden');
+                }
+                if (!toInput.contains(e.target) && !toSuggestions.contains(e.target)) {
+                    toSuggestions.classList.add('hidden');
+                }
+            });
+
+            // Handle form submission
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const searchBtn = document.getElementById('searchBtn');
+                searchBtn.disabled = true;
+                searchBtn.innerHTML = `
+                    <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Searching...
+                `;
+
+                const searchParams = {
+                    slices: [{
+                        from_: fromInput.value.trim().toUpperCase(),
+                        to: toInput.value.trim().toUpperCase(),
+                        date: document.getElementById('departDate').value
+                    }],
+                    adults: adults,
+                    children: children,
+                    infants: infants,
+                    cabin: document.getElementById('cabinClass').value
+                };
+
+                if (isReturn && document.getElementById('returnDate').value) {
+                    searchParams.slices.push({
+                        from_: toInput.value.trim().toUpperCase(),
+                        to: fromInput.value.trim().toUpperCase(),
+                        date: document.getElementById('returnDate').value
+                    });
+                }
+
+                try {
+                    const response = await fetch(`${API_BASE}/v1/search`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(searchParams)
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        sessionStorage.setItem('searchResults', JSON.stringify(data));
+                        sessionStorage.setItem('searchParams', JSON.stringify(searchParams));
+                        window.location.href = 'results.html';
+                    } else {
+                        alert(data.error || 'Search failed. Please try again.');
+                        searchBtn.disabled = false;
+                        searchBtn.innerHTML = `
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            Search Flights
+                        `;
+                    }
+                } catch (error) {
+                    console.error('Search error:', error);
+                    alert('An error occurred. Please try again.');
+                    searchBtn.disabled = false;
+                    searchBtn.innerHTML = `
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        Search Flights
+                    `;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

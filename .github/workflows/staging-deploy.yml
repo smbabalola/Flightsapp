@@ -1,0 +1,232 @@
+name: Staging Deployment & E2E Tests
+
+on:
+  push:
+    branches: [ staging, develop ]
+  workflow_dispatch:  # Manual trigger
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=staging-
+            type=raw,value=staging-latest
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-to-staging:
+    name: Deploy to Staging (K8s)
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    # Only run if you have K8s cluster configured
+    # Comment out this job if you don't have K8s yet
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Uncomment and configure these steps when K8s cluster is ready
+      # - name: Set up kubectl
+      #   uses: azure/setup-kubectl@v3
+
+      # - name: Configure kubectl
+      #   run: |
+      #     mkdir -p $HOME/.kube
+      #     echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
+
+      # - name: Update image in deployment
+      #   run: |
+      #     kubectl set image deployment/sureflights-api \
+      #       sureflights-api=${{ needs.build-and-push.outputs.image-tag }} \
+      #       -n sureflights-staging
+
+      # - name: Wait for rollout
+      #   run: |
+      #     kubectl rollout status deployment/sureflights-api -n sureflights-staging
+
+      - name: Deployment Info
+        run: |
+          echo "Docker image built and pushed: ${{ needs.build-and-push.outputs.image-tag }}"
+          echo "To deploy to K8s, configure kubectl and uncomment the deployment steps"
+          echo "Or use docker-compose for staging: docker-compose -f docker-compose.yml -f docker-compose.staging.yml up -d"
+
+  e2e-tests-staging:
+    name: Run E2E Tests on Staging
+    runs-on: ubuntu-latest
+    needs: build-and-push
+
+    env:
+      # Configure these based on your staging environment
+      BASE_URL: ${{ secrets.STAGING_URL || 'http://localhost:8001' }}
+      TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL || 'admin@sureflights.ng' }}
+      TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD || 'admin123' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Option 1: Test against deployed staging server
+      # - name: Wait for staging to be ready
+      #   run: |
+      #     for i in {1..30}; do
+      #       curl -fsS ${{ env.BASE_URL }}/health && break || sleep 10;
+      #     done
+
+      # Option 2: Run staging locally with docker-compose
+      - name: Start staging environment locally
+        run: |
+          # Create .env.staging file
+          cat > .env.staging << EOF
+          DATABASE_URL=postgresql://sureflights:staging_password@postgres:5432/sureflights
+          ENV=staging
+          USE_REAL_DUFFEL=false
+          USE_REAL_PAYSTACK=false
+          USE_REDIS_IDEMPOTENCY=true
+          USE_LIVE_FX_RATES=false
+          FX_NGN_RATE=1650
+          DUFFEL_API_KEY=${{ secrets.DUFFEL_API_KEY }}
+          PAYSTACK_SECRET=${{ secrets.PAYSTACK_SECRET }}
+          ADMIN_USER=admin
+          ADMIN_PASS=admin123
+          EOF
+
+          # Start services
+          docker-compose -f docker-compose.yml -f docker-compose.staging.yml up -d
+
+          # Wait for services to be healthy
+          echo "Waiting for services to be ready..."
+          for i in {1..60}; do
+            if curl -fsS http://localhost:8001/health > /dev/null 2>&1; then
+              echo "Services are ready!"
+              break
+            fi
+            if [ $i -eq 60 ]; then
+              echo "Services failed to start in time"
+              docker-compose logs
+              exit 1
+            fi
+            echo "Waiting... ($i/60)"
+            sleep 2
+          done
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright dependencies
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: |
+          BASE_URL=http://localhost:8001 \
+          HEADLESS=true \
+          npm test
+        continue-on-error: true
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-staging
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-staging
+          path: test-results/
+          retention-days: 30
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-staging
+          path: allure-results/
+          retention-days: 30
+
+      - name: Generate Allure report
+        if: always()
+        run: |
+          npm install -g allure-commandline --save-dev
+          allure generate allure-results --clean -o allure-report || true
+
+      - name: Upload Allure report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-staging
+          path: allure-report/
+          retention-days: 30
+
+      - name: Show docker logs on failure
+        if: failure()
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.staging.yml logs
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.staging.yml down -v
+
+  notify:
+    name: Notify Results
+    runs-on: ubuntu-latest
+    needs: [build-and-push, e2e-tests-staging]
+    if: always()
+
+    steps:
+      - name: Send notification
+        run: |
+          echo "Build Status: ${{ needs.build-and-push.result }}"
+          echo "E2E Tests Status: ${{ needs.e2e-tests-staging.result }}"
+          # Add Slack/Discord/Email notifications here if needed
+          # Example Slack webhook:
+          # curl -X POST -H 'Content-type: application/json' \
+          #   --data '{"text":"Staging deployment completed. Tests: ${{ needs.e2e-tests-staging.result }}"}' \
+          #   ${{ secrets.SLACK_WEBHOOK }}

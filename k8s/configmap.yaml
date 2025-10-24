@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sureflights-config
+  namespace: sureflights-staging
+data:
+  # Application settings
+  ENV: "staging"
+  LOG_LEVEL: "INFO"
+
+  # Feature flags
+  USE_REAL_DUFFEL: "true"
+  USE_REAL_PAYSTACK: "true"
+  USE_REDIS_IDEMPOTENCY: "true"
+  USE_LIVE_FX_RATES: "true"
+  IGNORE_DOMESTIC_ROUTES: "true"
+
+  # Database connection (non-sensitive parts)
+  DATABASE_HOST: "postgres-service"
+  DATABASE_PORT: "5432"
+  DATABASE_NAME: "sureflights"
+
+  # Redis
+  REDIS_HOST: "redis-service"
+  REDIS_PORT: "6379"
+
+  # FX rates
+  FX_NGN_RATE: "1650"
+  BASE_PRICING_CURRENCY: "USD"
+  DEFAULT_DISPLAY_CURRENCY: "NGN"
+  FX_SAFETY_MARGIN_PCT: "4.0"
+
+  # Pricing & Fees
+  MARKUP_PERCENTAGE: "10.0"
+  BOOKING_FEE_FIXED: "5000"
+  PAYMENT_FEE_PERCENTAGE: "1.5"
+
+  # Paystack
+  PAYSTACK_BASE_URL: "https://api.paystack.co"
+  PAYSTACK_SUPPORTED_CURRENCIES: "NGN,GHS,ZAR,USD"
+  PAYSTACK_FALLBACK_CURRENCY: "USD"
+
+  # Branding
+  APP_NAME: "GoCome"
+  APP_LOGIN_URL: "https://gocome.africa"

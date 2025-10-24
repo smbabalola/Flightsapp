@@ -1,0 +1,19 @@
+# Node / Python / Docker ignores
+node_modules/
+.venv*/
+venv/
+__pycache__/
+*.pyc
+
+# Env files
+.env
+.env.*
+
+# Build & logs
+dist/
+build/
+*.log
+
+# OS / editor junk
+.DS_Store
+Thumbs.db

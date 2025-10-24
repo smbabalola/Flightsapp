@@ -1,0 +1,45 @@
+SureFlights Ops Status — Payments & FX
+Updated: 2025-10-22
+
+Summary
+- Introduced USD-base pricing model with display currency conversion and FX safety margin.
+- Added admin-manageable pricing/FX settings and daily FX audit logging.
+
+Environment
+- Added to .env.example:
+  - BASE_PRICING_CURRENCY=USD
+  - DEFAULT_DISPLAY_CURRENCY=NGN
+  - USE_LIVE_FX_RATES=false
+  - FX_NGN_RATE=1650
+  - FX_SAFETY_MARGIN_PCT=4.0
+  - MARKUP_PERCENTAGE=10.0
+  - BOOKING_FEE_FIXED=5000
+  - PAYMENT_FEE_PERCENTAGE=1.5
+
+Database
+- New tables (alembic/versions/0012_pricing_fx.py):
+  - pricing_config: single-row config for base/display currency, markup, fees, safety margin
+  - pricing_audit: daily log of raw vs effective FX rates applied
+
+Admin
+- /admin/fees displays and updates pricing_config (base/display currencies, markup, fees, safety margin).
+
+Backend Changes
+- app/utils/fx.py: general convert_amount/get_rate with optional safety margin.
+- app/utils/pricing.py: calculate_display_price_from_usd_base + DB-backed config + audit logging.
+- app/integrations/duffel_client.py: offers now priced in configured display currency (fallback NGN).
+- app/services/booking_service.py: Paystack init now uses offer currency (multi-currency support), stored on quotes/payments.
+- app/services/search_service.py, app/api/v1/search.py: propagate optional `display_currency` to pricing.
+- app/api/v1/offers.py: price endpoint supports `display_currency` override.
+
+CI/CD & Testing
+- GitHub Actions workflow added: `.github/workflows/ci.yml`
+  - Spins up Postgres, runs Alembic, launches API, runs Playwright E2E
+- Playwright scaffolding: `package.json`, `playwright.config.ts`, `e2e/smoke.spec.ts`
+- Allure reporter enabled; results in `allure-results` uploaded as artifact
+
+Open Items
+- Surface user currency selector in dashboard (limit to Paystack-supported currencies).
+- Done: currency selector added to dashboard; persists via `/v1/ops/preferences`. Hooked into search requests.
+- Add per-tenant overrides for enterprise accounts.
+- Add health checks for live FX and gateway currency availability.

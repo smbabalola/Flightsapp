@@ -1,0 +1,36 @@
+version: '3.8'
+
+# Staging environment override for docker-compose.yml
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.staging.yml up
+
+services:
+  app:
+    image: sureflights-app:staging
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    environment:
+      ENV: staging
+      USE_REAL_DUFFEL: "true"
+      USE_REAL_PAYSTACK: "true"
+      LOG_LEVEL: INFO
+    volumes: []  # Remove development volume mount
+    ports:
+      - "8001:8000"  # Different port for staging
+
+  postgres:
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_STAGING_PASSWORD:-staging_secure_password}
+    volumes:
+      - postgres_staging_data:/var/lib/postgresql/data
+
+  redis:
+    volumes:
+      - redis_staging_data:/data
+
+volumes:
+  postgres_staging_data:
+    driver: local
+  redis_staging_data:
+    driver: local

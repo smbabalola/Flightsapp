@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sureflights-staging
+  labels:
+    name: sureflights-staging
+    environment: staging

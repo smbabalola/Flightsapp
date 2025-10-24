@@ -1,0 +1,120 @@
+diff --git a/app/auth/permissions.py b/app/auth/permissions.py
+index 8e4d4d4..c0e9d7a 100644
+--- a/app/auth/permissions.py
++++ b/app/auth/permissions.py
+@@
+-from enum import Enum
+-from typing import Set, List
+-from dataclasses import dataclass
++from enum import Enum
++from typing import Set, List
++from dataclasses import dataclass, field
+@@
+ class Role(str, Enum):
+     """User roles as defined in RBAC spec."""
+     AGENT = "agent"
+     SUPERVISOR = "supervisor"
+     FINANCE = "finance"
+     ADMIN = "admin"
++
++
++class CompanyRole(str, Enum):
++    """Company-scoped roles for tenant users."""
++    ADMIN = "company_admin"
++    MANAGER = "manager"
++    EMPLOYEE = "employee"
++    FINANCE = "finance"
++
++
++class CompanyPermission(str, Enum):
++    """Tenant-level permissions."""
++    MANAGE_COMPANY = "manage_company"
++    MANAGE_EMPLOYEES = "manage_employees"
++    VIEW_EMPLOYEES = "view_employees"
++    SUBMIT_REQUESTS = "submit_requests"
++    APPROVE_LEVEL_ONE = "approve_level_one"
++    APPROVE_FINANCE = "approve_finance"
++    MANAGE_POLICIES = "manage_policies"
++    MANAGE_BILLING = "manage_billing"
++    VIEW_REPORTS = "view_reports"
++    VIEW_AUDIT_LOGS = "view_audit_logs"
+@@
+ @dataclass
+ class User:
+     """User model for authentication."""
+     id: int
+     email: str
+     name: str
+     role: Role
+     status: str
++    company_id: int | None = None
++    company_role: CompanyRole | None = None
++    permissions: Set[Permission] = field(default_factory=set)
++    company_permissions: Set[CompanyPermission] = field(default_factory=set)
+@@
+ def can_assign_role(assigner_role: Role, target_role: Role) -> bool:
+     """
+@@
+     return False
++
++
++COMPANY_ROLE_PERMISSIONS: dict[CompanyRole, Set[CompanyPermission]] = {
++    CompanyRole.ADMIN: {
++        CompanyPermission.MANAGE_COMPANY,
++        CompanyPermission.MANAGE_EMPLOYEES,
++        CompanyPermission.VIEW_EMPLOYEES,
++        CompanyPermission.SUBMIT_REQUESTS,
++        CompanyPermission.APPROVE_LEVEL_ONE,
++        CompanyPermission.APPROVE_FINANCE,
++        CompanyPermission.MANAGE_POLICIES,
++        CompanyPermission.MANAGE_BILLING,
++        CompanyPermission.VIEW_REPORTS,
++        CompanyPermission.VIEW_AUDIT_LOGS,
++    },
++    CompanyRole.MANAGER: {
++        CompanyPermission.VIEW_EMPLOYEES,
++        CompanyPermission.SUBMIT_REQUESTS,
++        CompanyPermission.APPROVE_LEVEL_ONE,
++        CompanyPermission.VIEW_REPORTS,
++    },
++    CompanyRole.FINANCE: {
++        CompanyPermission.VIEW_EMPLOYEES,
++        CompanyPermission.APPROVE_FINANCE,
++        CompanyPermission.MANAGE_BILLING,
++        CompanyPermission.VIEW_REPORTS,
++        CompanyPermission.VIEW_AUDIT_LOGS,
++    },
++    CompanyRole.EMPLOYEE: {
++        CompanyPermission.SUBMIT_REQUESTS,
++    },
++}
++
++
++def get_company_role_permissions(role: CompanyRole | None) -> Set[CompanyPermission]:
++    """Get permissions for a company-scoped role."""
++    if role is None:
++        return set()
++    return COMPANY_ROLE_PERMISSIONS.get(role, set())
++
++
++def has_company_permission(role: CompanyRole | None, permission: CompanyPermission) -> bool:
++    """Check if a company role has a specific permission."""
++    if role is None:
++        return False
++    return permission in COMPANY_ROLE_PERMISSIONS.get(role, set())
++
++
++def has_any_company_permission(role: CompanyRole | None, permissions: List[CompanyPermission]) -> bool:
++    """Check if a role has any of the specified company permissions."""
++    if role is None:
++        return False
++    role_perms = COMPANY_ROLE_PERMISSIONS.get(role, set())
++    return any(perm in role_perms for perm in permissions)
++
++
++def has_all_company_permissions(role: CompanyRole | None, permissions: List[CompanyPermission]) -> bool:
++    """Check if a role has all specified company permissions."""
++    if role is None:
++        return False
++    role_perms = COMPANY_ROLE_PERMISSIONS.get(role, set())
++    return all(perm in role_perms for perm in permissions)

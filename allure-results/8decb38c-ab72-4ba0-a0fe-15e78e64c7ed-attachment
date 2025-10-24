@@ -1,0 +1,208 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "SureFlights Logo SureFlights" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img "SureFlights Logo" [ref=e6]
+        - generic [ref=e7]: SureFlights
+      - generic [ref=e8]:
+        - button "Dark Mode" [ref=e9] [cursor=pointer]
+        - link "About" [ref=e10] [cursor=pointer]:
+          - /url: about.html
+        - link "Contact" [ref=e11] [cursor=pointer]:
+          - /url: contact.html
+        - link "Login" [ref=e12] [cursor=pointer]:
+          - /url: login.html
+        - link "Sign Up" [ref=e13] [cursor=pointer]:
+          - /url: signup.html
+        - link "Become a Partner" [ref=e14] [cursor=pointer]:
+          - /url: partner-signup.html
+  - main [ref=e15]:
+    - generic [ref=e16]:
+      - heading "Find Your Perfect Flight" [level=1] [ref=e17]
+      - paragraph [ref=e18]: Search and book flights worldwide with ease
+      - generic [ref=e19]:
+        - generic [ref=e20]: Manage corporate travel with SureFlights Partner Program.
+        - link "Become a Partner" [ref=e21] [cursor=pointer]:
+          - /url: partner-signup.html
+      - generic [ref=e23]:
+        - generic [ref=e24]:
+          - generic [ref=e25] [cursor=pointer]:
+            - radio "One-way" [checked] [ref=e26]
+            - generic [ref=e27]: One-way
+          - generic [ref=e28] [cursor=pointer]:
+            - radio "Round-trip" [ref=e29]
+            - generic [ref=e30]: Round-trip
+        - generic [ref=e31]:
+          - generic [ref=e32]:
+            - generic [ref=e33]: From
+            - combobox "From" [ref=e34]:
+              - option "Select origin city or airport"
+              - option "New York (JFK/LGA/EWR)"
+              - option "Los Angeles (LAX)"
+              - option "Miami (MIA)"
+              - option "Toronto (YYZ)"
+              - option "Mexico City (MEX)"
+              - option "London (LHR/LGW)"
+              - option "Paris (CDG)"
+              - option "Frankfurt (FRA)"
+              - option "Amsterdam (AMS)"
+              - option "Madrid (MAD)"
+              - option "Rome (FCO)"
+              - option "Lagos, Nigeria (LOS)" [selected]
+              - option "Abuja, Nigeria (ABV)"
+              - option "Port Harcourt, Nigeria (PHC)"
+              - option "Kano, Nigeria (KAN)"
+              - option "Cairo, Egypt (CAI)"
+              - option "Johannesburg, South Africa (JNB)"
+              - option "Accra, Ghana (ACC)"
+              - option "Nairobi, Kenya (NBO)"
+              - option "Dubai (DXB)"
+              - option "Singapore (SIN)"
+              - option "Hong Kong (HKG)"
+              - option "Tokyo (NRT/HND)"
+              - option "Bangkok (BKK)"
+              - option "New Delhi (DEL)"
+              - option "Doha (DOH)"
+              - option "Istanbul (IST)"
+              - option "Riyadh (RUH)"
+              - option "Sydney (SYD)"
+              - option "Auckland (AKL)"
+          - generic [ref=e35]:
+            - generic [ref=e36]: To
+            - combobox "To" [ref=e37]:
+              - option "Select destination city or airport" [selected]
+              - option "New York (JFK/LGA/EWR)"
+              - option "Los Angeles (LAX)"
+              - option "Miami (MIA)"
+              - option "Toronto (YYZ)"
+              - option "Mexico City (MEX)"
+              - option "London (LHR/LGW)"
+              - option "Paris (CDG)"
+              - option "Frankfurt (FRA)"
+              - option "Amsterdam (AMS)"
+              - option "Madrid (MAD)"
+              - option "Rome (FCO)"
+              - option "Lagos, Nigeria (LOS)"
+              - option "Abuja, Nigeria (ABV)"
+              - option "Port Harcourt, Nigeria (PHC)"
+              - option "Kano, Nigeria (KAN)"
+              - option "Cairo, Egypt (CAI)"
+              - option "Johannesburg, South Africa (JNB)"
+              - option "Accra, Ghana (ACC)"
+              - option "Nairobi, Kenya (NBO)"
+              - option "Dubai (DXB)"
+              - option "Singapore (SIN)"
+              - option "Hong Kong (HKG)"
+              - option "Tokyo (NRT/HND)"
+              - option "Bangkok (BKK)"
+              - option "New Delhi (DEL)"
+              - option "Doha (DOH)"
+              - option "Istanbul (IST)"
+              - option "Riyadh (RUH)"
+              - option "Sydney (SYD)"
+              - option "Auckland (AKL)"
+        - generic [ref=e39]:
+          - generic [ref=e40]: Departure Date
+          - textbox "Departure Date" [ref=e41]
+        - generic [ref=e42]:
+          - generic [ref=e43]:
+            - generic [ref=e44]: Adults
+            - combobox "Adults" [ref=e45]:
+              - option "1" [selected]
+              - option "2"
+              - option "3"
+              - option "4"
+              - option "5"
+          - generic [ref=e46]:
+            - generic [ref=e47]: Children
+            - combobox "Children" [ref=e48]:
+              - option "0" [selected]
+              - option "1"
+              - option "2"
+              - option "3"
+          - generic [ref=e49]:
+            - generic [ref=e50]: Infants
+            - combobox "Infants" [ref=e51]:
+              - option "0" [selected]
+              - option "1"
+              - option "2"
+        - generic [ref=e52]:
+          - generic [ref=e53]:
+            - generic [ref=e54]: Cabin Class
+            - combobox "Cabin Class" [ref=e55]:
+              - option "Economy" [selected]
+              - option "Premium Economy"
+              - option "Business"
+              - option "First"
+          - generic [ref=e56]:
+            - generic [ref=e57]: Currency
+            - combobox "Currency" [ref=e58]:
+              - option "Auto (based on location)"
+              - option "NGN (₦)" [selected]
+              - option "GHS (₵)"
+              - option "ZAR (R)"
+              - option "KES (KSh)"
+              - option "XOF"
+              - option "XAF"
+              - option "MAD (د.م.)"
+              - option "EGP (£)"
+              - option "USD ($)"
+              - option "CAD ($)"
+              - option "MXN ($)"
+              - option "BRL (R$)"
+              - option "EUR (€)"
+              - option "GBP (£)"
+              - option "CHF (Fr)"
+              - option "SEK (kr)"
+              - option "NOK (kr)"
+              - option "DKK (kr)"
+              - option "PLN (zł)"
+              - option "TRY (₺)"
+              - option "AED (د.إ)"
+              - option "SAR (﷼)"
+              - option "QAR (﷼)"
+              - option "KWD (د.ك)"
+              - option "JPY (¥)"
+              - option "CNY (¥)"
+              - option "INR (₹)"
+              - option "AUD ($)"
+              - option "NZD ($)"
+        - button "Search Flights" [ref=e59] [cursor=pointer]:
+          - img [ref=e60]
+          - text: Search Flights
+  - contentinfo [ref=e62]:
+    - generic [ref=e63]:
+      - generic [ref=e64]:
+        - generic [ref=e65]:
+          - heading "SureFlights" [level=3] [ref=e66]
+          - paragraph [ref=e67]: Your trusted partner for flight bookings worldwide
+        - generic [ref=e68]:
+          - heading "Quick Links" [level=4] [ref=e69]
+          - link "Home" [ref=e70] [cursor=pointer]:
+            - /url: /
+          - link "About Us" [ref=e71] [cursor=pointer]:
+            - /url: about.html
+          - link "Contact" [ref=e72] [cursor=pointer]:
+            - /url: contact.html
+        - generic [ref=e73]:
+          - heading "Account" [level=4] [ref=e74]
+          - link "Login" [ref=e75] [cursor=pointer]:
+            - /url: login.html
+          - link "Sign Up" [ref=e76] [cursor=pointer]:
+            - /url: signup.html
+          - link "Become a Partner" [ref=e77] [cursor=pointer]:
+            - /url: partner-signup.html
+        - generic [ref=e78]:
+          - heading "Support" [level=4] [ref=e79]
+          - link "Help Center" [ref=e80] [cursor=pointer]:
+            - /url: contact.html
+          - link "Terms of Service" [ref=e81] [cursor=pointer]:
+            - /url: "#"
+          - link "Privacy Policy" [ref=e82] [cursor=pointer]:
+            - /url: "#"
+      - paragraph [ref=e84]: © 2025 SureFlights. All rights reserved.
+```

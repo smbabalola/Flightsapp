@@ -1,0 +1,57 @@
+---
+# PostgreSQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: sureflights-staging
+  labels:
+    app: postgres
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5432
+    targetPort: 5432
+    protocol: TCP
+    name: postgres
+  selector:
+    app: postgres
+
+---
+# Redis Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: sureflights-staging
+  labels:
+    app: redis
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    targetPort: 6379
+    protocol: TCP
+    name: redis
+  selector:
+    app: redis
+
+---
+# SureFlights API Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: sureflights-api-service
+  namespace: sureflights-staging
+  labels:
+    app: sureflights-api
+spec:
+  type: LoadBalancer  # Use LoadBalancer for external access, or ClusterIP with Ingress
+  ports:
+  - port: 80
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  selector:
+    app: sureflights-api
+  sessionAffinity: ClientIP  # Sticky sessions for better user experience

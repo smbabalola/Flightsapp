@@ -1,0 +1,17 @@
+{% extends "admin_base.html" %}
+{% block title %}Feature Flags{% endblock %}
+{% block content %}
+{% if request.query_params.get('updated') %}
+<div class="alert alert-success">✓ Features updated</div>
+{% endif %}
+<div class="card">
+  <h2>Feature Flags</h2>
+  <form method="POST" action="/admin/features" style="max-width:600px;">
+    <div class="form-group">
+      <label><input type="checkbox" name="ignore_domestic_routes" {% if flags.IGNORE_DOMESTIC_ROUTES in ['1','true','yes','on'] %}checked{% endif %}> Ignore domestic routes</label>
+    </div>
+    <button class="btn btn-success" type="submit">Save</button>
+  </form>
+</div>
+{% endblock %}
+

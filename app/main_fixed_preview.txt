@@ -1,0 +1,20 @@
+﻿from fastapi import FastAPI`nfrom app.core.logging import RequestIDMiddleware
+
+from app.api.v1 import router as api_v1_router
+from app.webhooks.routes import router as webhooks_router
+from app.api.health import router as health_router\nfrom app.api.root import router as root_router\nfrom app.api.metrics import router as metrics_router
+
+
+def create_app() -> FastAPI:
+    app = FastAPI(title="SureFlights API", version="0.1.0")`n    app.add_middleware(RequestIDMiddleware)`n    from app.core.settings import get_settings`n    get_settings().validate_startup()
+    app.include_router(root_router)\n    app.include_router(metrics_router)\n    app.include_router(health_router)
+    app.include_router(api_v1_router, prefix="/v1")
+    app.include_router(webhooks_router, prefix="/webhooks")
+    return app
+
+app = create_app()
+
+
+
+
+

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Payment - SureFlights</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .payment-mock-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        }
+
+        .payment-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2.5rem;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .mock-badge {
+            background: var(--warning);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .amount-display {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .amount-display .label {
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .amount-display .amount {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .payment-options {
+            display: grid;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .payment-option {
+            padding: 1rem;
+            border: 2px solid var(--gray-300);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .payment-option:hover {
+            border-color: var(--primary);
+            background: var(--gray-50);
+        }
+
+        .payment-option.selected {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .reference-info {
+            background: var(--gray-100);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .reference-info .label {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .reference-info .value {
+            font-family: monospace;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-top: 0.25rem;
+        }
+
+        .payment-channel {
+            margin-bottom: 1.5rem;
+            background: var(--gray-50);
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            color: var(--gray-700);
+        }
+
+        .payment-channel strong {
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-mock-container">
+        <div class="payment-card">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <svg width="48" height="48" viewBox="0 0 32 32" fill="none" style="margin: 0 auto;">
+                    <path d="M16 2L28 16L16 30L4 16L16 2Z" fill="#2563eb"/>
+                </svg>
+                <h2 style="margin-top: 1rem;">Complete Payment</h2>
+            </div>
+
+            <div class="mock-badge">
+                ⚠️ MOCK PAYMENT MODE - Development Only
+            </div>
+
+            <div class="reference-info">
+                <div class="label">Payment Reference</div>
+                <div class="value" id="paymentRef"></div>
+            </div>
+
+            <div class="payment-channel">
+                Paying with <strong id="paymentMethodLabel">Card</strong> via Paystack
+            </div>
+
+            <div class="amount-display">
+                <div class="label">Amount to Pay</div>
+                <div class="amount" id="amountDisplay">Loading...</div>
+            </div>
+
+            <div class="payment-options">
+                <div class="payment-option selected" data-method="success">
+                    <h4 style="margin-bottom: 0.5rem; color: var(--success);">✓ Simulate Success</h4>
+                    <p style="font-size: 0.875rem; color: var(--gray-600); margin: 0;">Payment will succeed</p>
+                </div>
+                <div class="payment-option" data-method="failed">
+                    <h4 style="margin-bottom: 0.5rem; color: var(--danger);">✗ Simulate Failure</h4>
+                    <p style="font-size: 0.875rem; color: var(--gray-600); margin: 0;">Payment will fail</p>
+                </div>
+            </div>
+
+            <button id="processBtn" class="btn btn-primary btn-large">
+                Process Mock Payment
+            </button>
+
+            <p style="text-align: center; margin-top: 1rem; font-size: 0.875rem; color: var(--gray-500);">
+                This is a simulated payment gateway for testing purposes only.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let selectedOutcome = 'success';
+        let reference = '';
+        let amount = 0;
+        let currency = 'USD';
+        let paymentMethod = 'card';
+
+        // Extract reference from URL or session storage
+        window.addEventListener('DOMContentLoaded', () => {
+            // Try to get from URL first
+            const urlParams = new URLSearchParams(window.location.search);
+            reference = urlParams.get('reference') || '';
+
+            // If not in URL, try session storage
+            if (!reference) {
+                reference = sessionStorage.getItem('bookingReference') || 'UNKNOWN';
+            }
+
+            // Get amount and currency from session storage
+            const quoteId = sessionStorage.getItem('quoteId');
+            const selectedOffer = JSON.parse(sessionStorage.getItem('selectedOffer') || '{}');
+
+            if (selectedOffer.total_amount) {
+                amount = parseFloat(selectedOffer.total_amount);
+                currency = selectedOffer.total_currency || 'USD';
+            }
+
+            const storedPaymentMethod = sessionStorage.getItem('paymentMethod');
+            if (storedPaymentMethod && ['card', 'bank', 'ussd'].includes(storedPaymentMethod)) {
+                paymentMethod = storedPaymentMethod;
+            }
+            const methodLabels = {
+                card: 'Card',
+                bank: 'Bank Transfer',
+                ussd: 'USSD',
+            };
+            const methodLabel = methodLabels[paymentMethod] || 'Card';
+            document.getElementById('paymentMethodLabel').textContent = methodLabel;
+
+            // Display
+            document.getElementById('paymentRef').textContent = reference;
+            document.getElementById('amountDisplay').textContent = formatPrice(amount, currency);
+
+            // Payment option handlers
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+                    option.classList.add('selected');
+                    selectedOutcome = option.dataset.method;
+                });
+            });
+
+            // Process button
+            document.getElementById('processBtn').addEventListener('click', processPayment);
+        });
+
+        function formatPrice(amount, currency) {
+            if (currency === 'NGN') {
+                return '₦' + parseInt(amount).toLocaleString();
+            }
+            return currency + ' ' + parseFloat(amount).toLocaleString();
+        }
+
+        async function processPayment() {
+            const btn = document.getElementById('processBtn');
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+
+            // Simulate payment processing delay
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            if (selectedOutcome === 'success') {
+                // Simulate webhook callback
+                try {
+                    await fetch('/webhooks/paystack', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-paystack-signature': 'mock-signature'
+                        },
+                        body: JSON.stringify({
+                            event: 'charge.success',
+                            data: {
+                                reference: reference,
+                                status: 'success',
+                                amount: amount * 100, // Convert to minor units
+                                currency: currency,
+                                paid_at: new Date().toISOString(),
+                                channel: paymentMethod,
+                                customer: {
+                                    email: 'test@example.com'
+                                }
+                            }
+                        })
+                    });
+                } catch (error) {
+                    console.error('Webhook simulation failed:', error);
+                }
+
+                // Redirect to confirmation
+                window.location.href = `/confirmation.html?reference=${reference}&status=success`;
+            } else {
+                // Simulate failed payment
+                window.location.href = `/confirmation.html?reference=${reference}&status=failed`;
+            }
+        }
+    </script>
+</body>
+</html>

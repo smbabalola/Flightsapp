@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Settings - SureFlights</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .profile-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .profile-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .profile-header h2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-header p {
+            color: var(--gray-600);
+            font-size: 0.875rem;
+        }
+
+        .settings-section {
+            margin-bottom: 2rem;
+        }
+
+        .settings-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .settings-section h3 {
+            font-size: 1.125rem;
+            margin-bottom: 1rem;
+            color: var(--gray-900);
+        }
+
+        .regional-selectors {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 640px) {
+            .regional-selectors {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .selector-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .selector-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 0.5rem;
+        }
+
+        .selector-icon {
+            font-size: 1.125rem;
+        }
+
+        .selector-dropdown {
+            padding: 0.75rem 1rem;
+            border: 1.5px solid var(--gray-300);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .selector-dropdown:hover {
+            border-color: var(--primary);
+        }
+
+        .selector-dropdown:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .settings-info {
+            background: var(--gray-50);
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin-top: 1.5rem;
+        }
+
+        .settings-info p {
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            margin: 0;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        body.theme-dark .profile-card {
+            background: #1f2937;
+        }
+
+        body.theme-dark .selector-dropdown {
+            background: #374151;
+            border-color: #4b5563;
+            color: #f3f4f6;
+        }
+
+        body.theme-dark .settings-info {
+            background: #374151;
+        }
+    </style>
+</head>
+<body class="theme-light">
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="/" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: inherit;">
+                    <img src="images/logo.png" width="40" height="40" alt="SureFlights Logo" style="object-fit: contain;">
+                    <span style="font-weight: 700; font-size: 1.25rem;">SureFlights</span>
+                </a>
+            </div>
+            <div class="nav-links">
+                <label for="currencySelect" style="margin-right:0.5rem;">Currency</label>
+                <select id="currencySelect" class="nav-currency-select" style="margin-right:1rem;">
+                    <option value="NGN">NGN (₦)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="GBP">GBP (£)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="ZAR">ZAR (R)</option>
+                </select>
+                <button type="button" id="themeToggle" class="btn btn-secondary btn-sm" style="margin-right:0.75rem;">Dark Mode</button>
+                <a href="/">Search Flights</a>
+                <a href="dashboard.html">My Bookings</a>
+                <a href="profile.html" class="active">Profile</a>
+                <a href="#" id="logoutLink">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="profile-container">
+        <div id="success" class="success-message" style="display: none; margin-bottom: 1rem;"></div>
+        <div id="error" class="error-message" style="display: none; margin-bottom: 1rem;"></div>
+
+        <div class="profile-card">
+            <div class="profile-header">
+                <h2>Profile Settings</h2>
+                <p id="userEmail">Loading...</p>
+            </div>
+
+            <div class="settings-section">
+                <h3>Regional Preferences</h3>
+                <p style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: 1.5rem;">
+                    Select your country and preferred currency for personalized pricing and local information.
+                </p>
+
+                <div class="regional-selectors">
+                    <div class="selector-group">
+                        <label class="selector-label">
+                            <span class="selector-icon">Ã°Å¸Å’Â</span>
+                            Country / Region
+                        </label>
+                        <select id="countrySelector" class="selector-dropdown">
+                            <option value="GB">United Kingdom</option>
+                            <option value="US">United States</option>
+                            <option value="CA">Canada</option>
+                            <option value="NG">Nigeria</option>
+                            <option value="GH">Ghana</option>
+                            <option value="KE">Kenya</option>
+                            <option value="ZA">South Africa</option>
+                            <option value="AE">United Arab Emirates</option>
+                            <option value="AU">Australia</option>
+                            <option value="FR">France</option>
+                            <option value="DE">Germany</option>
+                            <option value="ES">Spain</option>
+                            <option value="IT">Italy</option>
+                            <option value="NL">Netherlands</option>
+                            <option value="BR">Brazil</option>
+                            <option value="IN">India</option>
+                            <option value="CN">China</option>
+                            <option value="JP">Japan</option>
+                            <option value="SG">Singapore</option>
+                        </select>
+                        <p style="font-size: 0.75rem; color: var(--gray-500); margin-top: 0.5rem;">
+                            Selecting the country you're in will give you local deals and information.
+                        </p>
+                    </div>
+
+                    <div class="selector-group">
+                        <label class="selector-label">
+                            <span class="selector-icon">Ã°Å¸â€™Â°</span>
+                            Currency
+                        </label>
+                        <select id="currencySelector" class="selector-dropdown">
+                            <option value="GBP">GBP - Ã‚Â£</option>
+                            <option value="USD">USD - $</option>
+                            <option value="EUR">EUR - Ã¢â€šÂ¬</option>
+                            <option value="NGN">NGN - Ã¢â€šÂ¦</option>
+                            <option value="CAD">CAD - CA$</option>
+                            <option value="AUD">AUD - A$</option>
+                            <option value="AED">AED - Ã˜Â¯.Ã˜Â¥</option>
+                            <option value="ZAR">ZAR - R</option>
+                            <option value="JPY">JPY - Ã‚Â¥</option>
+                            <option value="CNY">CNY - Ã‚Â¥</option>
+                            <option value="INR">INR - Ã¢â€šÂ¹</option>
+                            <option value="BRL">BRL - R$</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="settings-info">
+                    <p>
+                        Ã°Å¸â€™Â¡ <strong>Tip:</strong> Your currency preference will be used to display flight prices across the platform.
+                        Exchange rates are updated regularly.
+                    </p>
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <button type="button" id="saveButton" class="btn btn-primary">Save Changes</button>
+                <button type="button" id="cancelButton" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>SureFlights</h3>
+                    <p>Your trusted partner for flight bookings worldwide.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="/">Home</a>
+                    <a href="about.html">About Us</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Account</h4>
+                    <a href="dashboard.html">My Bookings</a>
+                    <a href="profile.html">Profile Settings</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 SureFlights. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script>
+        let originalCountry = '';
+        let originalCurrency = '';
+
+        // Redirect if not logged in
+        if (!isLoggedIn()) {
+            window.location.href = 'login.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            initThemeToggle();
+            await loadUserProfile();
+
+            document.getElementById('saveButton').addEventListener('click', savePreferences);
+            document.getElementById('cancelButton').addEventListener('click', () => {
+                document.getElementById('countrySelector').value = originalCountry;
+                document.getElementById('currencySelector').value = originalCurrency;
+            });
+        });
+
+        async function loadUserProfile() {
+            try {
+                const response = await authFetch(`${API_BASE}/auth/me`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('userEmail').textContent = data.email;
+
+                    // Set current preferences
+                    const prefsResponse = await authFetch(`${API_BASE}/v1/ops/preferences`);
+                    if (prefsResponse.ok) {
+                        const prefs = await prefsResponse.json();
+                        originalCountry = prefs.country || 'GB';
+                        originalCurrency = prefs.preferred_currency || 'GBP';
+                        document.getElementById('countrySelector').value = originalCountry;
+                        document.getElementById('currencySelector').value = originalCurrency;
+                    }
+                } else {
+                    showError('Failed to load profile');
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                showError('Network error. Please try again.');
+            }
+        }
+
+        async function savePreferences() {
+            const saveButton = document.getElementById('saveButton');
+            const country = document.getElementById('countrySelector').value;
+            const currency = document.getElementById('currencySelector').value;
+
+            saveButton.disabled = true;
+            saveButton.textContent = 'Saving...';
+
+            try {
+                const response = await authFetch(`${API_BASE}/v1/ops/preferences`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        country,
+                        preferred_currency: currency
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    originalCountry = country;
+                    originalCurrency = currency;
+                    showSuccess('Preferences saved successfully!');
+                } else {
+                    showError(data.detail || 'Failed to save preferences');
+                }
+            } catch (error) {
+                console.error('Error saving preferences:', error);
+                showError('Network error. Please try again.');
+            } finally {
+                saveButton.disabled = false;
+                saveButton.textContent = 'Save Changes';
+            }
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('success');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            document.getElementById('success').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

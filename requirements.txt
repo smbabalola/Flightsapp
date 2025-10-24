@@ -1,0 +1,41 @@
+﻿fastapi==0.115.0
+uvicorn==0.30.6
+pydantic==2.9.2
+SQLAlchemy==2.0.35
+alembic==1.13.2
+psycopg[binary]==3.2.10
+python-dotenv==1.0.1
+
+
+redis==5.0.8
+
+httpx==0.27.2
+
+sentry-sdk==2.14.0
+
+# Twitter/X Integration
+tweepy>=4.14.0
+
+# Twilio Voice Integration
+twilio==9.0.4
+
+# AI/LLM for conversational handling
+openai==1.12.0
+
+cryptography==43.0.1
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+pytest==7.4.0
+pytest-asyncio==0.22.0
+httpx==0.27.2
+pytest-cov==4.1.0
+black==23.9.1
+isort==5.12.0
+structlog>=24.1.0
+jinja2>=3.1.4
+python-multipart>=0.0.6
+email-validator>=2.0.0
+bcrypt>=4.0.1
+passlib[argon2]==1.7.4
+argon2_cffi>=21.3.0
+httpx[http2]>=0.27.2

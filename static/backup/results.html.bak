@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flight Results - SureFlights</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/tailwind-custom.css" />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="bg-gray-100 text-gray-900 font-sans">
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <a href="/" class="flex items-center gap-2 text-inherit no-underline">
+                    <img src="images/logo.png" width="40" height="40" alt="SureFlights Logo" class="object-contain">
+                    <span class="text-xl font-bold">SureFlights</span>
+                </a>
+                <div class="hidden md:flex items-center gap-4">
+                    <button type="button" id="themeToggle" class="text-gray-600 hover:text-blue-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    </button>
+                    <div class="flex items-center">
+                        <label for="currencySelect" class="text-sm font-medium mr-2">Currency</label>
+                        <select id="currencySelect" class="border border-gray-300 rounded-md px-2 py-1 text-sm">
+                            <option value="NGN">NGN (&#8358;)</option>
+                            <option value="USD">USD ($)</option>
+                            <option value="GBP">GBP (&pound;)</option>
+                            <option value="EUR">EUR (&euro;)</option>
+                            <option value="ZAR">ZAR (R)</option>
+                        </select>
+                    </div>
+                    <a href="about.html" class="text-gray-600 hover:text-blue-600">About</a>
+                    <a href="contact.html" class="text-gray-600 hover:text-blue-600">Contact</a>
+                    <a href="dashboard.html" id="dashboardLink" class="hidden text-gray-600 hover:text-blue-600">My Bookings</a>
+                    <a href="login.html" id="loginLink" class="text-gray-600 hover:text-blue-600">Login</a>
+                    <a href="signup.html" id="signupLink" class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700">Sign Up</a>
+                    <a href="#" id="logoutLink" class="hidden text-gray-600 hover:text-blue-600">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="lg:flex lg:gap-8">
+            <aside class="lg:w-1/4 bg-white p-6 rounded-xl shadow-lg h-fit mb-8 lg:mb-0">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold">Filters</h3>
+                    <button type="button" id="clearFilters" class="text-sm text-blue-600 hover:underline">Clear all</button>
+                </div>
+
+                <!-- Stops Filter -->
+                <div class="border-b border-gray-200 pb-4 mb-4">
+                        <button type="button" class="w-full flex justify-between items-center font-semibold text-left" data-target="stopsFilter">
+                            <span>Stops</span>
+                            <svg class="w-5 h-5 toggle-icon rotate-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                    <div class="mt-4 space-y-2" id="stopsFilter">
+                        <label class="flex items-center"><input type="checkbox" id="filterDirect" class="form-checkbox text-blue-600 rounded" checked /> <span class="ml-2 text-sm">Direct flights</span></label>
+                        <label class="flex items-center"><input type="checkbox" id="filterOneStop" class="form-checkbox text-blue-600 rounded" checked /> <span class="ml-2 text-sm">1 stop</span></label>
+                        <label class="flex items-center"><input type="checkbox" id="filterTwoPlus" class="form-checkbox text-blue-600 rounded" checked /> <span class="ml-2 text-sm">2+ stops</span></label>
+                    </div>
+                </div>
+
+                <!-- Price Filter -->
+                <div class="border-b border-gray-200 pb-4 mb-4">
+                    <button type="button" class="w-full flex justify-between items-center font-semibold text-left" data-target="priceFilter">
+                        <span>Price</span>
+                        <svg class="w-5 h-5 toggle-icon rotate-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="mt-4" id="priceFilter">
+                        <label for="priceRange" class="block text-sm mb-2">Max price</label>
+                        <input type="range" id="priceRange" min="0" max="2000" value="2000" class="w-full" />
+                        <div class="text-sm text-right font-medium mt-1" id="priceRangeLabel">$2,000</div>
+                    </div>
+                </div>
+
+                <!-- Departure Time Filter -->
+                <div class="border-b border-gray-200 pb-4 mb-4">
+                    <button type="button" class="w-full flex justify-between items-center font-semibold text-left" data-target="departureTimeFilter">
+                        <span>Departure Time</span>
+                        <svg class="w-5 h-5 toggle-icon rotate-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="mt-4 space-y-2" id="departureTimeFilter">
+                        <label class="flex items-center"><input type="checkbox" id="filterMorning" class="form-checkbox text-blue-600 rounded" checked /> <span class="ml-2 text-sm">Morning (5AM - 12PM)</span></label>
+                        <label class="flex items-center"><input type="checkbox" id="filterAfternoon" class="form-checkbox text-blue-600 rounded" checked /> <span class="ml-2 text-sm">Afternoon (12PM - 6PM)</span></label>
+                        <label class="flex items-center"><input type="checkbox" id="filterEvening" class="form-checkbox text-blue-600 rounded" checked /> <span class="ml-2 text-sm">Evening (6PM - 12AM)</span></label>
+                        <label class="flex items-center"><input type="checkbox" id="filterNight" class="form-checkbox text-blue-600 rounded" checked /> <span class="ml-2 text-sm">Night (12AM - 5AM)</span></label>
+                    </div>
+                </div>
+
+                <!-- Airlines Filter -->
+                <div class="border-b border-gray-200 pb-4 mb-4">
+                    <button type="button" class="w-full flex justify-between items-center font-semibold text-left" data-target="airlinesFilter">
+                        <span>Airlines</span>
+                        <svg class="w-5 h-5 toggle-icon rotate-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="mt-4 space-y-2" id="airlinesFilter">
+                        <div id="airlinesCheckboxes"></div>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="lg:w-3/4">
+                <div class="bg-white p-6 rounded-xl shadow-lg mb-8">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-3xl font-bold">Available Flights</h2>
+                            <p class="text-gray-600" id="searchSummary"></p>
+                            <p class="text-sm text-gray-500" id="resultCount"></p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center">
+                                <label for="sortBy" class="text-sm font-medium mr-2">Sort by:</label>
+                                <select id="sortBy" class="border border-gray-300 rounded-md px-3 py-2 text-sm">
+                                    <option value="best">Best</option>
+                                    <option value="price">Lowest price</option>
+                                    <option value="duration">Shortest duration</option>
+                                    <option value="departure">Earliest departure</option>
+                                </select>
+                            </div>
+                            <a href="index.html" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-300">New search</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8" id="flightSummaryTabs" style="display:none;">
+                    <div class="summary-tab bg-white p-4 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow" id="bestTab" data-filter="best">
+                        <div class="text-sm font-semibold text-gray-600">Best</div>
+                        <div class="text-xl font-bold text-blue-600" id="bestPrice">-</div>
+                        <div class="text-sm text-gray-500" id="bestDuration">-</div>
+                    </div>
+                    <div class="summary-tab bg-white p-4 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow" id="cheapestTab" data-filter="price">
+                        <div class="text-sm font-semibold text-gray-600">Cheapest</div>
+                        <div class="text-xl font-bold text-green-600" id="cheapestPrice">-</div>
+                        <div class="text-sm text-gray-500" id="cheapestDuration">-</div>
+                    </div>
+                    <div class="summary-tab bg-white p-4 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow" id="fastestTab" data-filter="duration">
+                        <div class="text-sm font-semibold text-gray-600">Fastest</div>
+                        <div class="text-xl font-bold text-purple-600" id="fastestPrice">-</div>
+                        <div class="text-sm text-gray-500" id="fastestDuration">-</div>
+                    </div>
+                </div>
+
+                <div id="flightResults" class="space-y-6"></div>
+                <nav id="pagination" class="mt-8 flex justify-center items-center" aria-label="Search results pagination"></nav>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>SureFlights</h3>
+                    <p>Your trusted partner for flight bookings worldwide.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="/">Home</a>
+                    <a href="about.html">About Us</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Account</h4>
+                    <a href="login.html" id="footerLogin">Login</a>
+                    <a href="signup.html" id="footerSignup">Sign Up</a>
+                    <a href="dashboard.html" id="footerDashboard" style="display:none;">My Bookings</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 SureFlights. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script src="main.js"></script>
+    <script>
+        let originalOffers = [];
+        let filteredOffers = [];
+        let currentSearchParams = null;
+        let availableAirlines = [];
+        let availableAirports = [];
+        let currentPage = 1;
+        let pageSize = 10;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initThemeToggle();
+            updateNavigation();
+
+            const resultsStr = sessionStorage.getItem('searchResults');
+            const searchStr = sessionStorage.getItem('searchParams');
+
+            console.log('Raw search results:', resultsStr);
+
+            if (!resultsStr || !searchStr) {
+                alert('Search expired. Please start again.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const parsedResults = JSON.parse(resultsStr);
+            currentSearchParams = JSON.parse(searchStr);
+
+            console.log('Parsed results:', parsedResults);
+            console.log('Results offers:', parsedResults.offers);
+
+            originalOffers = Array.isArray(parsedResults) ? parsedResults : (parsedResults.offers || []);
+
+            if (!originalOffers.length) {
+                alert('No flights found for your search. Please try different dates or airports.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            displaySearchSummary();
+            extractAirlinesAndAirports();
+            // Initial summary from current page result set
+            displayBestCheapestFastest(originalOffers);
+            initialiseFilters();
+            initCollapsibleFilters();
+            applyFiltersAndSort();
+            renderPagination();
+        });
+
+        function displaySearchSummary() {
+            const summaryEl = document.getElementById('searchSummary');
+            const countEl = document.getElementById('resultCount');
+            const slice = currentSearchParams.slices[0];
+            const passengers = currentSearchParams.adults + (currentSearchParams.children || 0) + (currentSearchParams.infants || 0);
+            const cabin = formatCabinName(currentSearchParams.cabin || 'economy');
+            summaryEl.textContent = `${slice.from_} → ${slice.to} | ${slice.date} | ${passengers} passenger${passengers === 1 ? '' : 's'} | ${cabin}`;
+            countEl.textContent = `${originalOffers.length} flight option${originalOffers.length === 1 ? '' : 's'}`;
+        }
+
+        function extractAirlinesAndAirports() {
+            const airlinesMap = new Map();
+            const airportsMap = new Map();
+
+            originalOffers.forEach(offer => {
+                const segments = (offer.slices || offer.price?.slices || [])[0]?.segments || [];
+                segments.forEach((seg, idx) => {
+                    // Extract airlines
+                    if (seg.marketing_carrier) {
+                        const code = seg.marketing_carrier.iata_code;
+                        if (!airlinesMap.has(code)) {
+                            airlinesMap.set(code, {
+                                code: code,
+                                name: seg.marketing_carrier.name || code,
+                                count: 0
+                            });
+                        }
+                        airlinesMap.get(code).count++;
+                    }
+
+                    // Extract connection airports (not origin or final destination)
+                    if (idx > 0 && seg.origin) {
+                        const code = seg.origin.iata_code;
+                        if (code && !airportsMap.has(code)) {
+                            airportsMap.set(code, {
+                                code: code,
+                                name: seg.origin.city_name || seg.origin.name || code,
+                                count: 0
+                            });
+                        }
+                        if (code) airportsMap.get(code).count++;
+                    }
+                });
+            });
+
+            availableAirlines = Array.from(airlinesMap.values()).sort((a, b) => b.count - a.count);
+            availableAirports = Array.from(airportsMap.values()).sort((a, b) => b.count - a.count);
+
+            populateAirlineFilters();
+            populateAirportFilters();
+        }
+
+        function populateAirlineFilters() {
+            const container = document.getElementById('airlinesCheckboxes');
+            if (!availableAirlines.length) {
+                container.innerHTML = '<div class="text-sm text-gray-500">No airline data</div>';
+                return;
+            }
+
+            container.innerHTML = availableAirlines.map(airline => `
+                <label class="flex items-center justify-between">
+                    <span class="flex items-center">
+                        <input type="checkbox" class="form-checkbox text-blue-600 rounded airline-filter" value="${airline.code}" checked />
+                        <span class="ml-2 text-sm">${airline.name} (${airline.code})</span>
+                    </span>
+                    <span class="text-xs text-gray-500">${airline.count}</span>
+                </label>
+            `).join('');
+
+            container.querySelectorAll('.airline-filter').forEach(cb => {
+                cb.addEventListener('change', applyFiltersAndSort);
+            });
+        }
+
+        function populateAirportFilters() {
+            const container = document.getElementById('airportsCheckboxes');
+            if (!availableAirports.length) {
+                container.innerHTML = '<div style="padding:0.5rem;color:var(--gray-500);font-size:0.875rem;">No connections</div>';
+                return;
+            }
+
+            container.innerHTML = availableAirports.map(airport => `
+                <label class="filter-checkbox">
+                    <input type="checkbox" class="airport-filter" value="${airport.code}" checked />
+                    ${airport.name} (${airport.code})
+                    <span class="filter-count">${airport.count}</span>
+                </label>
+            `).join('');
+
+            container.querySelectorAll('.airport-filter').forEach(cb => {
+                cb.addEventListener('change', applyFiltersAndSort);
+            });
+        }
+
+        function displayBestCheapestFastest(sourceOffers) {
+            const list = Array.isArray(sourceOffers) && sourceOffers.length ? sourceOffers : originalOffers;
+            if (!list.length) return;
+
+            const summaryTabs = document.getElementById('flightSummaryTabs');
+            summaryTabs.style.display = 'flex';
+
+            // Find best (balanced score)
+            const scoredOffers = list.map(offer => {
+                const price = Number(offer.total_amount || offer.price?.total || 0);
+                const duration = getDurationMinutes(offer);
+                const prices = list.map(o => Number(o.total_amount || o.price?.total || 0));
+                const durs = list.map(o => getDurationMinutes(o));
+                const priceRange = Math.max(...prices) - Math.min(...prices) || 1;
+                const durRange = Math.max(...durs) - Math.min(...durs) || 1;
+                const priceScore = (price - Math.min(...prices)) / priceRange;
+                const durationScore = (duration - Math.min(...durs)) / durRange;
+                return { offer, score: priceScore + durationScore };
+            });
+            const bestOffer = scoredOffers.sort((a, b) => a.score - b.score)[0].offer;
+
+            // Find cheapest
+            const cheapestOffer = [...list].sort((a, b) =>
+                Number(a.total_amount || a.price?.total || 0) - Number(b.total_amount || b.price?.total || 0)
+            )[0];
+
+            // Find fastest
+            const fastestOffer = [...list].sort((a, b) =>
+                getDurationMinutes(a) - getDurationMinutes(b)
+            )[0];
+
+            // Update summary tabs
+            document.getElementById('bestPrice').textContent = formatPrice(
+                bestOffer.total_amount || bestOffer.price?.total,
+                bestOffer.total_currency || bestOffer.price?.currency
+            );
+            document.getElementById('bestDuration').textContent = formatDurationFromOffer(bestOffer);
+
+            document.getElementById('cheapestPrice').textContent = formatPrice(
+                cheapestOffer.total_amount || cheapestOffer.price?.total,
+                cheapestOffer.total_currency || cheapestOffer.price?.currency
+            );
+            document.getElementById('cheapestDuration').textContent = formatDurationFromOffer(cheapestOffer);
+
+            document.getElementById('fastestPrice').textContent = formatPrice(
+                fastestOffer.total_amount || fastestOffer.price?.total,
+                fastestOffer.total_currency || fastestOffer.price?.currency
+            );
+            document.getElementById('fastestDuration').textContent = formatDurationFromOffer(fastestOffer);
+
+            // Add click handlers to summary tabs
+            document.querySelectorAll('.summary-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const filter = tab.dataset.filter;
+                    document.getElementById('sortBy').value = filter;
+                    applyFiltersAndSort();
+                    document.getElementById('flightResults').scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+        }
+
+        function formatDurationFromOffer(offer) {
+            const minutes = getDurationMinutes(offer);
+            const hours = Math.floor(minutes / 60);
+            const mins = Math.floor(minutes % 60);
+            return `${hours}h ${mins}m average`;
+        }
+
+        function initCollapsibleFilters() {
+            document.querySelectorAll('[data-target]').forEach(header => {
+                header.addEventListener('click', () => {
+                    const targetId = header.dataset.target;
+                    const content = document.getElementById(targetId);
+                    const icon = header.querySelector('.toggle-icon');
+
+                    if (content.classList.contains('hidden')) {
+                        content.classList.remove('hidden');
+                        icon.classList.remove('rotate-0');
+                        icon.classList.add('-rotate-180');
+                    } else {
+                        content.classList.add('hidden');
+                        icon.classList.add('rotate-0');
+                        icon.classList.remove('-rotate-180');
+                    }
+                });
+            });
+            // Clear filters button
+            document.getElementById('clearFilters').addEventListener('click', () => {
+                // Reset all checkboxes to checked
+                document.querySelectorAll('.filter-bar input[type="checkbox"]').forEach(cb => cb.checked = true);
+
+                // Reset sliders
+                const priceRange = document.getElementById('priceRange');
+                if (priceRange) priceRange.value = priceRange.max;
+
+                const durationRange = document.getElementById('durationRange');
+                if (durationRange) durationRange.value = durationRange.max;
+
+                applyFiltersAndSort();
+            });
+        }
+
+        function initialiseFilters() {
+            // Price range filter
+            const ranges = originalOffers.map(o => Number(o.total_amount || o.price?.total || 0));
+            const priceRange = document.getElementById('priceRange');
+            const priceRangeLabel = document.getElementById('priceRangeLabel');
+            if (priceRange && ranges.length) {
+                const maxPrice = Math.max(...ranges);
+                const sliderMax = Math.ceil(maxPrice / 50) * 50;
+                priceRange.max = sliderMax;
+                priceRange.value = sliderMax;
+                priceRangeLabel.textContent = `$${sliderMax.toLocaleString()}`;
+                priceRange.addEventListener('input', () => {
+                    priceRangeLabel.textContent = `$${Number(priceRange.value).toLocaleString()}`;
+                    applyFiltersAndSort();
+                });
+            }
+
+            // Duration range filter
+            const durations = originalOffers.map(o => getDurationMinutes(o));
+            const durationRange = document.getElementById('durationRange');
+            const durationRangeLabel = document.getElementById('durationRangeLabel');
+            if (durationRange && durations.length) {
+                const maxDuration = Math.max(...durations);
+                durationRange.max = maxDuration;
+                durationRange.value = maxDuration;
+                updateDurationLabel(maxDuration);
+                durationRange.addEventListener('input', () => {
+                    updateDurationLabel(Number(durationRange.value));
+                    applyFiltersAndSort();
+                });
+            }
+
+            function updateDurationLabel(minutes) {
+                const hours = Math.floor(minutes / 60);
+                const mins = Math.floor(minutes % 60);
+                durationRangeLabel.textContent = `${hours}h ${mins}m`;
+            }
+
+            // Stops filters
+            ['filterDirect', 'filterOneStop', 'filterTwoPlus'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', applyFiltersAndSort);
+            });
+
+            // Departure time filters
+            ['filterMorning', 'filterAfternoon', 'filterEvening', 'filterNight'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', applyFiltersAndSort);
+            });
+
+            // Baggage filters
+            ['filterCarryOn', 'filterCheckedBag', 'filterMultipleBags', 'filterNoBaggageInfo'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', applyFiltersAndSort);
+            });
+
+            // Sort select
+            const sortSelect = document.getElementById('sortBy');
+            if (sortSelect) sortSelect.addEventListener('change', applyFiltersAndSort);
+        }
+
+        function applyFiltersAndSort() {
+            // Stops filters
+            const allowDirect = document.getElementById('filterDirect')?.checked ?? true;
+            const allowOne = document.getElementById('filterOneStop')?.checked ?? true;
+            const allowTwoPlus = document.getElementById('filterTwoPlus')?.checked ?? true;
+
+            // Price filter
+            const maxPrice = Number(document.getElementById('priceRange')?.value || Number.MAX_SAFE_INTEGER);
+
+            // Departure time filters
+            const allowMorning = document.getElementById('filterMorning')?.checked ?? true;
+            const allowAfternoon = document.getElementById('filterAfternoon')?.checked ?? true;
+            const allowEvening = document.getElementById('filterEvening')?.checked ?? true;
+            const allowNight = document.getElementById('filterNight')?.checked ?? true;
+
+            // Duration filter
+            const maxDuration = Number(document.getElementById('durationRange')?.value || Number.MAX_SAFE_INTEGER);
+
+            // Airlines filter
+            const selectedAirlines = Array.from(document.querySelectorAll('.airline-filter:checked')).map(cb => cb.value);
+
+            // Airports filter
+            const selectedAirports = Array.from(document.querySelectorAll('.airport-filter:checked')).map(cb => cb.value);
+
+            // Baggage filters
+            const allowCarryOn = document.getElementById('filterCarryOn')?.checked ?? true;
+            const allowCheckedBag = document.getElementById('filterCheckedBag')?.checked ?? true;
+            const allowMultipleBags = document.getElementById('filterMultipleBags')?.checked ?? true;
+            const allowNoBaggageInfo = document.getElementById('filterNoBaggageInfo')?.checked ?? true;
+
+            filteredOffers = originalOffers.filter(offer => {
+                const slice = (offer.slices || offer.price?.slices || [])[0] || {};
+                const segments = slice.segments || [];
+
+                // Filter by stops
+                const stops = Math.max(segments.length - 1, 0);
+                if (stops === 0 && !allowDirect) return false;
+                if (stops === 1 && !allowOne) return false;
+                if (stops >= 2 && !allowTwoPlus) return false;
+
+                // Filter by price
+                const price = Number(offer.total_amount || offer.price?.total || 0);
+                if (price > maxPrice) return false;
+
+                // Filter by departure time
+                if (segments.length > 0) {
+                    const departTime = new Date(segments[0].departing_at);
+                    const hour = departTime.getHours();
+                    let timeAllowed = false;
+
+                    if (hour >= 5 && hour < 12 && allowMorning) timeAllowed = true;
+                    if (hour >= 12 && hour < 18 && allowAfternoon) timeAllowed = true;
+                    if (hour >= 18 && hour < 24 && allowEvening) timeAllowed = true;
+                    if (hour >= 0 && hour < 5 && allowNight) timeAllowed = true;
+
+                    if (!timeAllowed) return false;
+                }
+
+                // Filter by duration
+                const duration = getDurationMinutes(offer);
+                if (duration > maxDuration) return false;
+
+                // Filter by airlines
+                if (selectedAirlines.length > 0) {
+                    const offerAirlines = segments.map(seg => seg.marketing_carrier?.iata_code).filter(Boolean);
+                    const hasMatchingAirline = offerAirlines.some(code => selectedAirlines.includes(code));
+                    if (!hasMatchingAirline) return false;
+                }
+
+                // Filter by connection airports
+                if (selectedAirports.length > 0 && segments.length > 1) {
+                    const connectionAirports = segments.slice(1).map(seg => seg.origin?.iata_code).filter(Boolean);
+                    if (connectionAirports.length > 0) {
+                        const hasMatchingAirport = connectionAirports.some(code => selectedAirports.includes(code));
+                        if (!hasMatchingAirport) return false;
+                    }
+                } else if (selectedAirports.length > 0 && segments.length === 1) {
+                    // Direct flight with airport filter active - exclude
+                    return false;
+                }
+
+                // Filter by baggage
+                const baggageType = getBaggageType(segments);
+                if (baggageType === 'carry-on' && !allowCarryOn) return false;
+                if (baggageType === 'checked' && !allowCheckedBag) return false;
+                if (baggageType === 'multiple' && !allowMultipleBags) return false;
+                if (baggageType === 'unknown' && !allowNoBaggageInfo) return false;
+
+                return true;
+            });
+
+            const sortValue = document.getElementById('sortBy')?.value || 'best';
+            switch (sortValue) {
+                case 'price':
+                    filteredOffers.sort((a, b) => Number(a.total_amount || a.price?.total || 0) - Number(b.total_amount || b.price?.total || 0));
+                    break;
+                case 'duration':
+                    filteredOffers.sort((a, b) => getDurationMinutes(a) - getDurationMinutes(b));
+                    break;
+                case 'departure':
+                    filteredOffers.sort((a, b) => getDepartureTime(a) - getDepartureTime(b));
+                    break;
+                default:
+                    break;
+            }
+
+            const countEl = document.getElementById('resultCount');
+            if (countEl) countEl.textContent = `${filteredOffers.length} flight option${filteredOffers.length === 1 ? '' : 's'} shown`;
+            // Reset to first page after filtering
+            currentPage = 1;
+            renderOffers();
+            renderPagination();
+            // Keep summary aligned with visible dataset
+            displayBestCheapestFastest(filteredOffers);
+        }
+
+        function getBaggageType(segments) {
+            if (!segments || !segments.length) return 'unknown';
+
+            const firstSegment = segments[0];
+            const baggage = firstSegment.passengers?.[0]?.baggages || [];
+
+            if (!baggage.length) {
+                const included = firstSegment.baggage_included;
+                if (included === undefined || included === null) return 'unknown';
+                return included ? 'checked' : 'carry-on';
+            }
+
+            const checkedBags = baggage.filter(b => b.type === 'checked').length;
+            const carryOn = baggage.filter(b => b.type === 'carry_on').length;
+
+            if (checkedBags >= 2) return 'multiple';
+            if (checkedBags === 1) return 'checked';
+            if (carryOn > 0) return 'carry-on';
+
+            return 'unknown';
+        }
+
+        async function fetchPage(page) {
+            try {
+                const res = await fetch(`${API_BASE}/v1/search?page=${page}&page_size=${pageSize}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentSearchParams)
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    originalOffers = data.offers || [];
+                    totalResults = data.total || 0;
+                    filteredOffers = originalOffers.slice();
+                    currentPage = page;
+                    displayBestCheapestFastest(filteredOffers);
+                    renderOffers();
+                    renderPagination();
+                }
+            } catch (e) { console.error('Pagination fetch failed', e); }
+        }
+
+        function renderOffers() {
+            const container = document.getElementById('flightResults');
+            container.innerHTML = '';
+            filteredOffers.forEach(offer => {
+                const card = createFlightCard(offer);
+                if (card) container.appendChild(card);
+            });
+        }
+
+        function renderPagination() {
+            const nav = document.getElementById('pagination');
+            if (!nav) return;
+            nav.innerHTML = '';
+            const total = filteredOffers.length;
+            const totalPages = Math.max(1, Math.ceil(total / pageSize));
+            if (totalPages <= 1) return;
+
+            const btn = (label, disabled, onClick, aria) => {
+                const el = document.createElement('button');
+                el.className = 'btn btn-secondary btn-sm';
+                el.style.marginRight = '0.5rem';
+                el.textContent = label;
+                if (aria) el.setAttribute('aria-label', aria);
+                el.disabled = !!disabled;
+                if (!disabled) el.addEventListener('click', onClick);
+                return el;
+            };
+
+            nav.appendChild(btn('Prev', currentPage === 1, () => { fetchPage(currentPage - 1); window.scrollTo({top:0,behavior:'smooth'}); }, 'Previous page'));
+
+            const pageInfo = document.createElement('span');
+            pageInfo.style.margin = '0 0.5rem';
+            pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+            nav.appendChild(pageInfo);
+
+            nav.appendChild(btn('Next', currentPage === totalPages, () => { fetchPage(currentPage + 1); window.scrollTo({top:0,behavior:'smooth'}); }, 'Next page'));
+
+            const sizeLabel = document.createElement('label');
+            sizeLabel.style.marginLeft = '1rem';
+            sizeLabel.textContent = 'Per page:';
+            const select = document.createElement('select');
+            select.style.marginLeft = '0.5rem';
+            ;[5,10,20,50].forEach(n => {
+                const opt = document.createElement('option');
+                opt.value = n;
+                opt.textContent = n;
+                if (n === pageSize) opt.selected = true;
+                select.appendChild(opt);
+            });
+            select.addEventListener('change', () => {
+                pageSize = parseInt(select.value);
+                fetchPage(1);
+            });
+            nav.appendChild(sizeLabel);
+            nav.appendChild(select);
+        }
+
+        // Inline SVG icons (normalized to avoid emoji/mojibake across platforms)
+        const ICONS = {
+            baggage: '<svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-4 h-4 mr-1 align-text-bottom" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 7V6a2 2 0 012-2h8a2 2 0 012 2v1"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 7h12v11a2 2 0 01-2 2H8a2 2 0 01-2-2V7z"/></svg>',
+            warning: '<svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-4 h-4 mr-1 align-text-bottom text-orange-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 17h.01"/></svg>'
+        };
+
+        function getBaggageInfo(segments) {
+            if (!segments || !segments.length) return 'Baggage: Check airline';
+
+            const firstSegment = segments[0];
+            const baggage = firstSegment.passengers?.[0]?.baggages || [];
+
+            if (!baggage.length) {
+                const included = firstSegment.baggage_included;
+                if (included === undefined || included === null) {
+                    return ICONS.baggage + 'Baggage: Check details';
+                }
+                return ICONS.baggage + (included ? 'Baggage included' : 'No baggage');
+            }
+
+            const checkedBags = baggage.filter(b => b.type === 'checked').length;
+            const carryOn = baggage.filter(b => b.type === 'carry_on').length;
+
+            if (checkedBags > 0 && carryOn > 0) {
+                return ICONS.baggage + `${checkedBags} checked + ${carryOn} carry-on`;
+            } else if (checkedBags > 0) {
+                return ICONS.baggage + `${checkedBags} checked bag${checkedBags > 1 ? 's' : ''}`;
+            } else if (carryOn > 0) {
+                return ICONS.baggage + `${carryOn} carry-on only`;
+            }
+
+            return ICONS.baggage + 'Check baggage policy';
+        }
+
+        function getLayoverInfo(segments) {
+            if (!segments || segments.length < 2) return null;
+
+            const layovers = [];
+            for (let i = 0; i < segments.length - 1; i++) {
+                const currentSegment = segments[i];
+                const nextSegment = segments[i + 1];
+
+                const arrivalTime = new Date(currentSegment.arriving_at);
+                const departureTime = new Date(nextSegment.departing_at);
+                const layoverMs = departureTime - arrivalTime;
+
+                const layoverHours = Math.floor(layoverMs / (1000 * 60 * 60));
+                const layoverMinutes = Math.floor((layoverMs % (1000 * 60 * 60)) / (1000 * 60));
+
+                const airport = currentSegment.destination?.iata_code || 'Unknown';
+                const cityName = currentSegment.destination?.city_name || currentSegment.destination?.name || '';
+
+                const layoverDuration = layoverHours > 0
+                    ? `${layoverHours}h ${layoverMinutes}m`
+                    : `${layoverMinutes}m`;
+
+                layovers.push(`${airport} (${cityName}) - ${layoverDuration}`);
+            }
+
+            return layovers.join(' • ');
+        }
+
+        function createFlightCard(offer) {
+            const slices = offer.slices || offer.price?.slices || [];
+            if (!slices.length) return null;
+            const firstSlice = slices[0];
+            const segments = firstSlice.segments || [];
+            if (!segments.length) return null;
+            const first = segments[0];
+            const last = segments[segments.length - 1];
+            const airline = first.marketing_carrier || { name: 'Airline', iata_code: 'XX' };
+            const departTime = new Date(first.departing_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            const arriveTime = new Date(last.arriving_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            const duration = calculateDuration(first.departing_at, last.arriving_at);
+            const price = formatPrice(offer.total_amount || offer.price?.total, offer.total_currency || offer.price?.currency);
+            const stops = segments.length - 1;
+
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-xl shadow-lg overflow-hidden transition-transform transform hover:-translate-y-1';
+            const baggageInfo = getBaggageInfo(segments);
+            const layoverInfo = getLayoverInfo(segments);
+            const hasSelfTransfer = checkSelfTransfer(segments);
+
+            card.innerHTML = `
+                <div class="p-6">
+                    <div class="flex justify-between items-start">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-gray-200 rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg">${airline.iata_code || ''}</div>
+                            <div>
+                                <div class="font-bold text-lg">${airline.name || 'Airline'}</div>
+                                <div class="text-sm text-gray-600">${stops === 0 ? 'Direct' : `${stops} stop${stops > 1 ? 's' : ''}`}</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold text-blue-600">${price}</div>
+                                            ${hasSelfTransfer ? '<span class="inline-flex items-center gap-2 text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-semibold mt-1 inline-block" title="Different airlines - you may need to collect and re-check baggage">\n                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 17h.01"/></svg>Self transfer</span>' : ''}
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-between items-center">
+                        <div class="text-center">
+                            <div class="text-2xl font-semibold">${departTime}</div>
+                            <div class="text-sm text-gray-600">${first.origin?.iata_code || ''}</div>
+                            <div class="text-xs text-gray-500">${(first.origin?.city_name || first.origin?.name || '')}</div>
+                        </div>
+                        <div class="text-center flex-grow">
+                            <div class="text-sm font-medium text-gray-800">${duration}</div>
+                            <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                                <div class="bg-blue-600 h-1.5 rounded-full"></div>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">${baggageInfo}</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-semibold">${arriveTime}</div>
+                            <div class="text-sm text-gray-600">${last.destination?.iata_code || ''}</div>
+                            <div class="text-xs text-gray-500">${(last.destination?.city_name || last.destination?.name || '')}</div>
+                        </div>
+                    </div>
+                </div>
+                ${layoverInfo ? `<div class="bg-gray-50 px-6 py-3 border-t border-gray-200 text-sm text-gray-700">
+                    <strong>Layover${segments.length > 2 ? 's' : ''}:</strong> ${layoverInfo}
+                </div>` : ''}
+                <div class="bg-gray-50 px-6 py-4">
+                    <button class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors" data-offer-id="${offer.id}">Select Flight</button>
+                </div>
+            `;
+            card.querySelector('button').addEventListener('click', () => selectFlight(offer.id));
+            return card;
+        }
+
+        function checkSelfTransfer(segments) {
+            if (segments.length < 2) return false;
+
+            for (let i = 0; i < segments.length - 1; i++) {
+                const currentCarrier = segments[i].marketing_carrier?.iata_code;
+                const nextCarrier = segments[i + 1].marketing_carrier?.iata_code;
+
+                if (currentCarrier && nextCarrier && currentCarrier !== nextCarrier) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function calculateDuration(start, end) {
+            const diff = new Date(end) - new Date(start);
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            return `${hours}h ${minutes}m`;
+        }
+
+                function formatPrice(amount, currency) {
+            const value = Number(amount || 0);
+            const curr = String(currency || 'USD').toUpperCase();
+            const symbols = { NGN: '₦', USD: '$', GBP: '£', EUR: '€', ZAR: 'R', JPY: '¥', CNY: '¥', CAD: '$', AUD: '$' };
+            const symbol = symbols[curr];
+            if (symbol) {
+                if (curr === 'NGN') {
+                    return symbol + Math.round(value).toLocaleString();
+                }
+                return symbol + value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+            return curr + ' ' + value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }function getDurationMinutes(offer) {
+            const slices = offer.slices || offer.price?.slices || [];
+            if (!slices.length) return Number.MAX_SAFE_INTEGER;
+            const segments = slices[0].segments || [];
+            if (!segments.length) return Number.MAX_SAFE_INTEGER;
+            const start = new Date(segments[0].departing_at);
+            const end = new Date(segments[segments.length - 1].arriving_at);
+            return (end - start) / (1000 * 60);
+        }
+
+        function getDepartureTime(offer) {
+            const slices = offer.slices || offer.price?.slices || [];
+            const segment = slices[0]?.segments?.[0];
+            return segment ? new Date(segment.departing_at).getTime() : Number.MAX_SAFE_INTEGER;
+        }
+
+        function selectFlight(offerId) {
+            const stored = sessionStorage.getItem('searchResults');
+            if (!stored) {
+                window.location.href = 'index.html';
+                return;
+            }
+            const parsed = JSON.parse(stored);
+            const offers = Array.isArray(parsed) ? parsed : (parsed.offers || []);
+            const selectedOffer = offers.find(o => o.id === offerId);
+
+            if (!isLoggedIn()) {
+                alert('Please log in to continue with booking.');
+                if (selectedOffer) {
+                    sessionStorage.setItem('selectedOffer', JSON.stringify(selectedOffer));
+                }
+                window.location.href = 'login.html';
+                return;
+            }
+
+            if (selectedOffer) {
+                sessionStorage.setItem('selectedOffer', JSON.stringify(selectedOffer));
+                window.location.href = 'booking.html';
+            }
+        }
+    </script>
+</body>
+</html>

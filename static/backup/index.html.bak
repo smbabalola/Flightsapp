@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SureFlights - Book Your Flight</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/tailwind-custom.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-100 text-gray-900 font-sans">
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center gap-2">
+                    <img src="images/logo.png" width="40" height="40" alt="SureFlights Logo" class="object-contain">
+                    <span class="text-xl font-bold">SureFlights</span>
+                </div>
+                <div class="hidden md:flex items-center gap-4">
+                    <button type="button" id="themeToggle" class="text-gray-600 hover:text-blue-600 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-1">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                        <span class="sr-only">Toggle theme</span>
+                    </button>
+                    <div class="flex items-center">
+                        <label for="currencySelect" class="text-sm font-medium mr-2">Currency</label>
+                        <select id="currencySelect" class="border border-gray-300 rounded-md px-2 py-1 text-sm">
+                            <option value="NGN">NGN (&#8358;)</option>
+                            <option value="USD">USD ($)</option>
+                            <option value="GBP">GBP (&pound;)</option>
+                            <option value="EUR">EUR (&euro;)</option>
+                            <option value="ZAR">ZAR (R)</option>
+                        </select>
+                    </div>
+                    <a href="about.html" class="text-gray-600 hover:text-blue-600">About</a>
+                    <a href="contact.html" class="text-gray-600 hover:text-blue-600">Contact</a>
+                    <a href="dashboard.html" id="dashboardLink" class="hidden text-gray-600 hover:text-blue-600">My Bookings</a>
+                    <a href="partner-dashboard.html" id="partnerDashboardLink" class="hidden text-gray-600 hover:text-blue-600">Partner Dashboard</a>
+                    <a href="login.html" id="loginLink" class="text-gray-600 hover:text-blue-600">Login</a>
+                    <a href="signup.html" id="signupLink" class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700">Sign Up</a>
+                    <a href="partner-signup.html" id="partnerLink" class="border border-blue-600 text-blue-600 px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-50">Become a Partner</a>
+                    <a href="#" id="logoutLink" class="hidden text-gray-600 hover:text-blue-600">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative bg-cover bg-center" style="background-image: url('images/hero-bg.jpg');">
+        <div class="container mx-auto px-4 py-24 text-center text-white">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-4xl md:text-5xl font-extrabold leading-tight mb-3 drop-shadow">Find your perfect flight — faster</h1>
+                <p class="text-lg md:text-xl text-white/90 mb-6">Compare prices, times and airlines in one place.</p>
+
+                <div class="bg-white/30 backdrop-blur-sm rounded-xl p-4 mb-6">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <div class="text-left">
+                            <div class="text-sm font-semibold text-white">SureFlights Partner Program</div>
+                            <div class="text-xs text-white/90">Manage corporate travel with ease</div>
+                        </div>
+                        <a class="inline-flex items-center bg-white text-blue-600 px-4 py-2 rounded-md font-medium hover:bg-white/90" href="partner-signup.html">Become a Partner</a>
+                    </div>
+                </div>
+
+                <div class="bg-white text-gray-900 rounded-2xl shadow-2xl p-6 md:p-8">
+                    <form id="searchForm" class="space-y-5">
+                        <div class="flex items-center justify-center gap-6">
+                            <div class="flex items-center gap-3 bg-gray-50 rounded-full px-3 py-2 border border-gray-200">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="tripType" value="one-way" class="form-radio text-brand-500 focus:ring-brand-500" checked>
+                                    <span class="text-sm font-medium">One-way</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="tripType" value="round-trip" class="form-radio text-brand-500 focus:ring-brand-500">
+                                    <span class="text-sm font-medium">Round-trip</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="from" class="block text-sm font-medium text-gray-700 mb-1">From</label>
+                                <select id="from" required class="w-full border border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 bg-white">
+                                    <option value="">Select origin city or airport</option>
+                                <optgroup label="North America">
+                                    <option value="NYC">New York (JFK/LGA/EWR)</option>
+                                    <option value="LAX">Los Angeles (LAX)</option>
+                                    <option value="MIA">Miami (MIA)</option>
+                                    <option value="YYZ">Toronto (YYZ)</option>
+                                    <option value="MEX">Mexico City (MEX)</option>
+                                </optgroup>
+                                <optgroup label="Europe">
+                                    <option value="LON">London (LHR/LGW)</option>
+                                    <option value="PAR">Paris (CDG)</option>
+                                    <option value="FRA">Frankfurt (FRA)</option>
+                                    <option value="AMS">Amsterdam (AMS)</option>
+                                    <option value="MAD">Madrid (MAD)</option>
+                                    <option value="ROM">Rome (FCO)</option>
+                                </optgroup>
+                                <optgroup label="Africa">
+                                    <option value="LOS">Lagos, Nigeria (LOS)</option>
+                                    <option value="ABV">Abuja, Nigeria (ABV)</option>
+                                    <option value="PHC">Port Harcourt, Nigeria (PHC)</option>
+                                    <option value="KAN">Kano, Nigeria (KAN)</option>
+                                    <option value="CAI">Cairo, Egypt (CAI)</option>
+                                    <option value="JNB">Johannesburg, South Africa (JNB)</option>
+                                    <option value="ACC">Accra, Ghana (ACC)</option>
+                                    <option value="NBO">Nairobi, Kenya (NBO)</option>
+                                </optgroup>
+                                <optgroup label="Asia">
+                                    <option value="DXB">Dubai (DXB)</option>
+                                    <option value="SIN">Singapore (SIN)</option>
+                                    <option value="HKG">Hong Kong (HKG)</option>
+                                    <option value="TYO">Tokyo (NRT/HND)</option>
+                                    <option value="BKK">Bangkok (BKK)</option>
+                                    <option value="DEL">New Delhi (DEL)</option>
+                                </optgroup>
+                                <optgroup label="Middle East">
+                                    <option value="DOH">Doha (DOH)</option>
+                                    <option value="IST">Istanbul (IST)</option>
+                                    <option value="RUH">Riyadh (RUH)</option>
+                                </optgroup>
+                                <optgroup label="Oceania">
+                                    <option value="SYD">Sydney (SYD)</option>
+                                    <option value="AKL">Auckland (AKL)</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="to" class="block text-sm font-medium text-gray-700 mb-1">To</label>
+                            <select id="to" required class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select destination city or airport</option>
+                                <optgroup label="North America">
+                                    <option value="NYC">New York (JFK/LGA/EWR)</option>
+                                    <option value="LAX">Los Angeles (LAX)</option>
+                                    <option value="MIA">Miami (MIA)</option>
+                                    <option value="YYZ">Toronto (YYZ)</option>
+                                    <option value="MEX">Mexico City (MEX)</option>
+                                </optgroup>
+                                <optgroup label="Europe">
+                                    <option value="LON">London (LHR/LGW)</option>
+                                    <option value="PAR">Paris (CDG)</option>
+                                    <option value="FRA">Frankfurt (FRA)</option>
+                                    <option value="AMS">Amsterdam (AMS)</option>
+                                    <option value="MAD">Madrid (MAD)</option>
+                                    <option value="ROM">Rome (FCO)</option>
+                                </optgroup>
+                                <optgroup label="Africa">
+                                    <option value="LOS">Lagos, Nigeria (LOS)</option>
+                                    <option value="ABV">Abuja, Nigeria (ABV)</option>
+                                    <option value="PHC">Port Harcourt, Nigeria (PHC)</option>
+                                    <option value="KAN">Kano, Nigeria (KAN)</option>
+                                    <option value="CAI">Cairo, Egypt (CAI)</option>
+                                    <option value="JNB">Johannesburg, South Africa (JNB)</option>
+                                    <option value="ACC">Accra, Ghana (ACC)</option>
+                                    <option value="NBO">Nairobi, Kenya (NBO)</option>
+                                </optgroup>
+                                <optgroup label="Asia">
+                                    <option value="DXB">Dubai (DXB)</option>
+                                    <option value="SIN">Singapore (SIN)</option>
+                                    <option value="HKG">Hong Kong (HKG)</option>
+                                    <option value="TYO">Tokyo (NRT/HND)</option>
+                                    <option value="BKK">Bangkok (BKK)</option>
+                                    <option value="DEL">New Delhi (DEL)</option>
+                                </optgroup>
+                                <optgroup label="Middle East">
+                                    <option value="DOH">Doha (DOH)</option>
+                                    <option value="IST">Istanbul (IST)</option>
+                                    <option value="RUH">Riyadh (RUH)</option>
+                                </optgroup>
+                                <optgroup label="Oceania">
+                                    <option value="SYD">Sydney (SYD)</option>
+                                    <option value="AKL">Auckland (AKL)</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label for="departDate" class="block text-sm font-medium text-gray-700 mb-1">Departure Date</label>
+                            <input type="date" id="departDate" required class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div id="returnDateGroup" class="hidden">
+                            <label for="returnDate" class="block text-sm font-medium text-gray-700 mb-1">Return Date</label>
+                            <input type="date" id="returnDate" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="departDate" class="block text-sm font-medium text-gray-700 mb-1">Departure date</label>
+                                <input type="date" id="departDate" required class="w-full border border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 bg-white">
+                            </div>
+                            <div id="returnDateGroup" class="hidden">
+                                <label for="returnDate" class="block text-sm font-medium text-gray-700 mb-1">Return date</label>
+                                <input type="date" id="returnDate" class="w-full border border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 bg-white">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="adults" class="block text-sm font-medium text-gray-700 mb-1">Adults</label>
+                                <select id="adults" required class="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white">
+                                    <option value="1" selected>1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="children" class="block text-sm font-medium text-gray-700 mb-1">Children</label>
+                                <select id="children" class="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white">
+                                    <option value="0" selected>0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="infants" class="block text-sm font-medium text-gray-700 mb-1">Infants</label>
+                                <select id="infants" class="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white">
+                                    <option value="0" selected>0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="cabin" class="block text-sm font-medium text-gray-700 mb-1">Cabin class</label>
+                                <select id="cabin" required class="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white">
+                                    <option value="economy" selected>Economy</option>
+                                    <option value="premium_economy">Premium Economy</option>
+                                    <option value="business">Business</option>
+                                    <option value="first">First</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <button type="submit" class="w-full inline-flex items-center justify-center gap-3 bg-brand-500 text-white font-semibold py-3 px-4 rounded-lg hover:bg-brand-600 transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                <span>Search flights</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>SureFlights</h3>
+                    <p>Your trusted partner for flight bookings worldwide</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="/">Home</a>
+                    <a href="about.html">About Us</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Account</h4>
+                    <a href="login.html" id="footerLogin">Login</a>
+                    <a href="signup.html" id="footerSignup">Sign Up</a>
+                    <a href="partner-signup.html" id="footerPartner">Become a Partner</a>
+                    <a href="dashboard.html" id="footerDashboard" style="display: none;">My Bookings</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <a href="contact.html">Help Center</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Privacy Policy</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 SureFlights. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

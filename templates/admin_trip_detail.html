@@ -1,0 +1,129 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Trip Details - {{ trip.pnr }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 1rem;">
+    <a href="/admin/trips" style="color: #3498db; text-decoration: none;">← Back to Trips</a>
+</div>
+
+<div class="card">
+    <h2>Trip Details - {{ trip.pnr or 'N/A' }}</h2>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 1.5rem;">
+        <div>
+            <h3 style="font-size: 1rem; color: #666; margin-bottom: 1rem;">Booking Information</h3>
+            <table style="width: 100%;">
+                <tr>
+                    <td style="padding: 0.5rem 0; color: #666;">PNR:</td>
+                    <td style="padding: 0.5rem 0;"><strong>{{ trip.pnr or 'N/A' }}</strong></td>
+                </tr>
+                <tr>
+                    <td style="padding: 0.5rem 0; color: #666;">Status:</td>
+                    <td style="padding: 0.5rem 0;">
+                        {% if trip.status == 'paid' %}
+                            <span class="badge success">Paid</span>
+                        {% elif trip.status == 'pending' %}
+                            <span class="badge warning">Pending</span>
+                        {% elif trip.status == 'ticketed' %}
+                            <span class="badge info">Ticketed</span>
+                        {% else %}
+                            <span class="badge">{{ trip.status }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 0.5rem 0; color: #666;">Route:</td>
+                    <td style="padding: 0.5rem 0;">{{ trip.route_summary or 'N/A' }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 0.5rem 0; color: #666;">Total Price:</td>
+                    <td style="padding: 0.5rem 0;">
+                        <strong>
+                            {% if trip.currency == 'NGN' %}
+                                ₦{{ "%.2f"|format(trip.total_price_ngn or 0) }}
+                            {% else %}
+                                {{ trip.currency }} {{ "%.2f"|format(trip.total_price_ngn or 0) }}
+                            {% endif %}
+                        </strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 0.5rem 0; color: #666;">Created:</td>
+                    <td style="padding: 0.5rem 0;">{{ trip.created_at[:19] if trip.created_at else 'N/A' }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 0.5rem 0; color: #666;">Updated:</td>
+                    <td style="padding: 0.5rem 0;">{{ trip.updated_at[:19] if trip.updated_at else 'N/A' }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div>
+            <h3 style="font-size: 1rem; color: #666; margin-bottom: 1rem;">Contact Information</h3>
+            <table style="width: 100%;">
+                <tr>
+                    <td style="padding: 0.5rem 0; color: #666;">Email:</td>
+                    <td style="padding: 0.5rem 0;">{{ trip.contact_email or 'N/A' }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 0.5rem 0; color: #666;">Phone:</td>
+                    <td style="padding: 0.5rem 0;">{{ trip.contact_phone or 'N/A' }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 0.5rem 0; color: #666;">Passenger:</td>
+                    <td style="padding: 0.5rem 0;">{{ trip.passenger_info or 'N/A' }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if payment %}
+<div class="card">
+    <h2>Payment Details</h2>
+    <table style="width: 100%; max-width: 600px;">
+        <tr>
+            <td style="padding: 0.5rem 0; color: #666;">Reference:</td>
+            <td style="padding: 0.5rem 0;"><strong>{{ payment.reference }}</strong></td>
+        </tr>
+        <tr>
+            <td style="padding: 0.5rem 0; color: #666;">Amount:</td>
+            <td style="padding: 0.5rem 0;">₦{{ "%.2f"|format(payment.amount_ngn or 0) }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 0.5rem 0; color: #666;">Status:</td>
+            <td style="padding: 0.5rem 0;">
+                {% if payment.status == 'succeeded' %}
+                    <span class="badge success">Succeeded</span>
+                {% else %}
+                    <span class="badge">{{ payment.status }}</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 0.5rem 0; color: #666;">Created:</td>
+            <td style="padding: 0.5rem 0;">{{ payment.created_at[:19] if payment.created_at else 'N/A' }}</td>
+        </tr>
+    </table>
+</div>
+{% endif %}
+
+<div class="card">
+    <h2>Technical Details</h2>
+    <table style="width: 100%; max-width: 600px;">
+        <tr>
+            <td style="padding: 0.5rem 0; color: #666;">Trip ID:</td>
+            <td style="padding: 0.5rem 0;">{{ trip.id }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 0.5rem 0; color: #666;">Offer ID:</td>
+            <td style="padding: 0.5rem 0; font-family: monospace; font-size: 0.9rem;">{{ trip.offer_id or 'N/A' }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 0.5rem 0; color: #666;">Payment Reference:</td>
+            <td style="padding: 0.5rem 0;">{{ trip.paystack_reference or 'N/A' }}</td>
+        </tr>
+    </table>
+</div>
+{% endblock %}

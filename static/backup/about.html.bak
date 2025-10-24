@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - SureFlights</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="/" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: inherit;">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <path d="M16 2L28 16L16 30L4 16L16 2Z" fill="#2563eb"/>
+                    </svg>
+                    <span>SureFlights</span>
+                </a>
+            </div>
+            <div class="nav-links">
+                <label for="currencySelect" style="margin-right:0.5rem;">Currency</label>
+                <select id="currencySelect" class="nav-currency-select" style="margin-right:1rem;">
+                    <option value="NGN">NGN (₦)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="GBP">GBP (£)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="ZAR">ZAR (R)</option>
+                </select>
+                <a href="/">Home</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+                <a href="dashboard.html" id="dashboardLink" style="display: none;">My Bookings</a>
+                <a href="login.html" id="loginLink">Login</a>
+                <a href="signup.html" id="signupLink" class="btn btn-primary btn-sm">Sign Up</a>
+                <a href="#" id="logoutLink" style="display: none;">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="about-container" style="padding-top: 3rem; padding-bottom: 3rem;">
+        <h1 style="text-align: center; margin-bottom: 1rem;">About SureFlights</h1>
+        <p style="text-align: center; color: var(--gray-600); margin-bottom: 3rem; font-size: 1.125rem;">
+            Your trusted partner for flight bookings worldwide
+        </p>
+
+        <div class="about-section">
+            <h2>Who We Are</h2>
+            <p>
+                SureFlights is a global flight booking platform, dedicated to making air travel accessible,
+                affordable, and hassle-free for everyone. We connect travelers with the best flight options across
+                the world, ensuring a seamless booking experience from start to finish.
+            </p>
+            <p>
+                Founded with a vision to revolutionize how people book flights, we leverage cutting-edge technology
+                to bring you real-time flight information, competitive pricing, and secure payment options for destinations
+                across North America, Europe, Africa, Asia, the Middle East, and Oceania.
+            </p>
+        </div>
+
+        <div class="about-section">
+            <h2>Our Mission</h2>
+            <p>
+                To simplify air travel for everyone by providing a reliable, user-friendly platform that offers
+                transparent pricing, extensive flight options, and exceptional customer service. We believe that
+                everyone deserves access to convenient and affordable air travel, no matter where they're going.
+            </p>
+        </div>
+
+        <div class="about-section">
+            <h2>Why Choose SureFlights?</h2>
+            <div style="display: grid; gap: 1.5rem; margin-top: 1.5rem;">
+                <div style="display: flex; gap: 1rem;">
+                    <div style="flex-shrink: 0;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 style="margin-bottom: 0.5rem; color: var(--gray-800);">Trusted Platform</h3>
+                        <p>Secure bookings with trusted payment partners and verified airlines.</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <div style="flex-shrink: 0;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 8V12L15 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 style="margin-bottom: 0.5rem; color: var(--gray-800);">Real-Time Updates</h3>
+                        <p>Get instant flight availability and pricing information.</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <div style="flex-shrink: 0;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z M2 17L12 22L22 17M2 12L12 17L22 12" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 style="margin-bottom: 0.5rem; color: var(--gray-800);">Best Prices</h3>
+                        <p>Compare flights and find the best deals for your journey.</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <div style="flex-shrink: 0;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 20C18 18.4087 17.3679 16.8826 16.2426 15.7574C15.1174 14.6321 13.5913 14 12 14C10.4087 14 8.88258 14.6321 7.75736 15.7574C6.63214 16.8826 6 18.4087 6 20M12 11C13.6569 11 15 9.65685 15 8C15 6.34315 13.6569 5 12 5C10.3431 5 9 6.34315 9 8C9 9.65685 10.3431 11 12 11Z" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 style="margin-bottom: 0.5rem; color: var(--gray-800);">24/7 Support</h3>
+                        <p>Our customer support team is always ready to assist you.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="about-section">
+            <h2>Our Coverage</h2>
+            <p>
+                We serve major cities and airports across the globe including New York, London, Dubai, Tokyo, Lagos,
+                Johannesburg, Sydney, and many more. Our partnerships with leading international airlines
+                ensure you have access to a wide range of flight options wherever you want to go.
+            </p>
+        </div>
+
+        <div class="about-section" style="text-align: center; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white;">
+            <h2 style="color: white;">Ready to Book Your Next Flight?</h2>
+            <p style="color: rgba(255, 255, 255, 0.9); margin-bottom: 2rem;">
+                Join thousands of satisfied travelers who trust SureFlights for their journey
+            </p>
+            <a href="/" class="btn" style="background: white; color: var(--primary);">
+                Search Flights Now
+            </a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>SureFlights</h3>
+                    <p>Your trusted partner for flight bookings worldwide</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="/">Home</a>
+                    <a href="about.html">About Us</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Account</h4>
+                    <a href="login.html" id="footerLogin">Login</a>
+                    <a href="signup.html" id="footerSignup">Sign Up</a>
+                    <a href="dashboard.html" id="footerDashboard" style="display: none;">My Bookings</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <a href="contact.html">Help Center</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Privacy Policy</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 SureFlights. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="auth.js"></script>
+</body>
+</html>

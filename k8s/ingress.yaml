@@ -1,0 +1,28 @@
+# Optional: Ingress for domain-based routing (requires Ingress Controller like NGINX)
+# If using LoadBalancer service, this is optional
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sureflights-ingress
+  namespace: sureflights-staging
+  annotations:
+    # nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"  # For SSL/TLS
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx  # Adjust based on your Ingress controller
+  tls:
+  - hosts:
+    - staging.gocome.africa  # Replace with your domain
+    secretName: sureflights-tls
+  rules:
+  - host: staging.gocome.africa  # Replace with your domain
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sureflights-api-service
+            port:
+              number: 80

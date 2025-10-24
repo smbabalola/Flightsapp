@@ -1,0 +1,45 @@
+{% extends "admin_base.html" %}
+{% block title %}Users{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>Users</h2>
+  <form method="GET" action="/admin/users" style="margin-bottom:1rem; display:flex; gap:0.5rem;">
+    <input type="text" name="q" placeholder="Search by email or name" value="{{ q }}" style="flex:1;">
+    <button class="btn btn-secondary" type="submit">Search</button>
+  </form>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Email</th>
+        <th>Name</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ u.id }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.name }}</td>
+        <td>{{ u.role }}</td>
+        <td>{{ u.status }}</td>
+        <td>
+          <form method="POST" action="/admin/users/{{ u.id }}/role" style="display:flex; gap:0.5rem; align-items:center;">
+            <select name="role">
+              {% for r in roles %}
+                <option value="{{ r }}" {% if r == u.role %}selected{% endif %}>{{ r }}</option>
+              {% endfor %}
+            </select>
+            <button class="btn btn-primary btn-sm" type="submit">Update</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+

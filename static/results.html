@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flight Results - SureFlights</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/tailwind-custom.css" />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="container mx-auto">
+            <div class="flex justify-between items-center py-4">
+                <a href="/" class="flex items-center gap-2 no-underline">
+                    <img src="images/logo.png" width="40" height="40" alt="SureFlights Logo" class="object-contain">
+                    <span class="text-2xl font-bold" style="color: var(--brand-primary);">SureFlights</span>
+                </a>
+
+                <div class="hidden md:flex items-center gap-6">
+                    <button type="button" id="themeToggle" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                        </svg>
+                    </button>
+
+                    <div class="flex items-center gap-2">
+                        <select id="currencySelect" class="border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium hover:border-gray-400 transition-colors cursor-pointer">
+                            <option value="NGN">NGN (₦)</option>
+                            <option value="USD">USD ($)</option>
+                            <option value="GBP">GBP (£)</option>
+                            <option value="EUR">EUR (€)</option>
+                            <option value="ZAR">ZAR (R)</option>
+                        </select>
+                    </div>
+
+                    <a href="about.html" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">About</a>
+                    <a href="contact.html" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Contact</a>
+                    <a href="dashboard.html" id="dashboardLink" class="hidden text-gray-700 hover:text-blue-600 font-medium transition-colors">My Bookings</a>
+                    <a href="login.html" id="loginLink" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Login</a>
+                    <a href="signup.html" id="signupLink" class="btn-primary text-sm">Sign Up</a>
+                    <button id="logoutLink" class="hidden text-gray-700 hover:text-blue-600 font-medium transition-colors">Logout</button>
+                </div>
+
+                <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-gray-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto py-6">
+        <!-- Search Summary & Actions -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-6 animate-fade-in">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 mb-2">Available Flights</h1>
+                    <p class="text-gray-600" id="searchSummary"></p>
+                    <p class="text-sm font-medium text-blue-600 mt-1" id="resultCount"></p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <select id="sortBy" class="border border-gray-300 rounded-lg px-4 py-2.5 text-sm font-medium hover:border-gray-400 transition-colors cursor-pointer">
+                        <option value="best">Best</option>
+                        <option value="price">Lowest price</option>
+                        <option value="duration">Shortest duration</option>
+                        <option value="departure">Earliest departure</option>
+                    </select>
+                    <a href="index.html" class="btn-secondary px-4 py-2.5 text-sm">New search</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Filters (Best/Cheapest/Fastest) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6" id="flightSummaryTabs" style="display:none;">
+            <div class="card p-5 cursor-pointer hover:border-2 hover:border-blue-500 transition-all" id="bestTab" data-filter="best">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-semibold text-gray-600">Best</span>
+                    <span class="badge badge-info text-xs">Recommended</span>
+                </div>
+                <div class="text-2xl font-bold text-blue-600 mb-1" id="bestPrice">-</div>
+                <div class="text-sm text-gray-500" id="bestDuration">-</div>
+            </div>
+
+            <div class="card p-5 cursor-pointer hover:border-2 hover:border-green-500 transition-all" id="cheapestTab" data-filter="price">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-semibold text-gray-600">Cheapest</span>
+                    <span class="badge badge-success text-xs">Best value</span>
+                </div>
+                <div class="text-2xl font-bold text-green-600 mb-1" id="cheapestPrice">-</div>
+                <div class="text-sm text-gray-500" id="cheapestDuration">-</div>
+            </div>
+
+            <div class="card p-5 cursor-pointer hover:border-2 hover:border-purple-500 transition-all" id="fastestTab" data-filter="duration">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-semibold text-gray-600">Fastest</span>
+                    <span class="badge" style="background-color: #f3e8ff; color: #7c3aed; font-size: 0.75rem;">Quickest</span>
+                </div>
+                <div class="text-2xl font-bold text-purple-600 mb-1" id="fastestPrice">-</div>
+                <div class="text-sm text-gray-500" id="fastestDuration">-</div>
+            </div>
+        </div>
+
+        <div class="lg:flex lg:gap-6">
+            <!-- Filters Sidebar -->
+            <aside class="lg:w-80 mb-6 lg:mb-0">
+                <div class="bg-white rounded-xl shadow-md p-6 sticky top-24">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-bold text-gray-900">Filters</h2>
+                        <button type="button" id="clearFilters" class="text-sm text-blue-600 hover:text-blue-700 font-medium">Clear all</button>
+                    </div>
+
+                    <!-- Stops Filter -->
+                    <div class="border-b border-gray-200 pb-4 mb-4">
+                        <button type="button" class="w-full flex justify-between items-center font-semibold text-left mb-3" data-target="stopsFilter">
+                            <span>Stops</span>
+                            <svg class="w-5 h-5 toggle-icon transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="space-y-3" id="stopsFilter">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="filterDirect" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" checked />
+                                <span class="ml-3 text-sm text-gray-700">Direct flights</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="filterOneStop" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" checked />
+                                <span class="ml-3 text-sm text-gray-700">1 stop</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="filterTwoPlus" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" checked />
+                                <span class="ml-3 text-sm text-gray-700">2+ stops</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Price Filter -->
+                    <div class="border-b border-gray-200 pb-4 mb-4">
+                        <button type="button" class="w-full flex justify-between items-center font-semibold text-left mb-3" data-target="priceFilter">
+                            <span>Price</span>
+                            <svg class="w-5 h-5 toggle-icon transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="priceFilter">
+                            <div class="mb-2 flex justify-between text-sm">
+                                <span class="text-gray-600">Max price</span>
+                                <span class="font-semibold text-gray-900" id="priceRangeLabel">$2,000</span>
+                            </div>
+                            <input type="range" id="priceRange" min="0" max="2000" value="2000" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
+                        </div>
+                    </div>
+
+                    <!-- Departure Time Filter -->
+                    <div class="border-b border-gray-200 pb-4 mb-4">
+                        <button type="button" class="w-full flex justify-between items-center font-semibold text-left mb-3" data-target="departureTimeFilter">
+                            <span>Departure Time</span>
+                            <svg class="w-5 h-5 toggle-icon transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="space-y-3" id="departureTimeFilter">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="filterMorning" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" checked />
+                                <span class="ml-3 text-sm text-gray-700">Morning (5AM - 12PM)</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="filterAfternoon" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" checked />
+                                <span class="ml-3 text-sm text-gray-700">Afternoon (12PM - 6PM)</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="filterEvening" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" checked />
+                                <span class="ml-3 text-sm text-gray-700">Evening (6PM - 12AM)</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="filterNight" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" checked />
+                                <span class="ml-3 text-sm text-gray-700">Night (12AM - 5AM)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Airlines Filter -->
+                    <div class="pb-4">
+                        <button type="button" class="w-full flex justify-between items-center font-semibold text-left mb-3" data-target="airlinesFilter">
+                            <span>Airlines</span>
+                            <svg class="w-5 h-5 toggle-icon transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="space-y-3 max-h-60 overflow-y-auto" id="airlinesFilter">
+                            <div id="airlinesCheckboxes"></div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Results List -->
+            <div class="flex-1">
+                <div id="flightResults" class="space-y-4"></div>
+
+                <!-- Pagination -->
+                <nav id="pagination" class="mt-8 flex justify-center items-center gap-2" aria-label="Search results pagination"></nav>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>SureFlights</h3>
+                    <p>Your trusted partner for finding and booking the best flight deals worldwide.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="/">Home</a>
+                    <a href="about.html">About Us</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Account</h4>
+                    <a href="login.html" id="footerLogin">Login</a>
+                    <a href="signup.html" id="footerSignup">Sign Up</a>
+                    <a href="dashboard.html" id="footerDashboard" style="display:none;">My Bookings</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 SureFlights. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script src="main.js"></script>
+    <script>
+        let originalOffers = [];
+        let filteredOffers = [];
+        let currentSearchParams = null;
+        let availableAirlines = [];
+        let currentPage = 1;
+        let pageSize = 10;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initThemeToggle();
+            updateNavigation();
+
+            const resultsStr = sessionStorage.getItem('searchResults');
+            const searchStr = sessionStorage.getItem('searchParams');
+
+            if (!resultsStr || !searchStr) {
+                alert('Search expired. Please start a new search.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const parsedResults = JSON.parse(resultsStr);
+            currentSearchParams = JSON.parse(searchStr);
+
+            originalOffers = Array.isArray(parsedResults) ? parsedResults : (parsedResults.offers || []);
+
+            if (!originalOffers.length) {
+                alert('No flights found for your search. Please try different dates or airports.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            displaySearchSummary();
+            extractAirlines();
+            displayBestCheapestFastest(originalOffers);
+            initialiseFilters();
+            initCollapsibleFilters();
+            applyFiltersAndSort();
+        });
+
+        function displaySearchSummary() {
+            const summaryEl = document.getElementById('searchSummary');
+            const countEl = document.getElementById('resultCount');
+            const slice = currentSearchParams.slices[0];
+            const passengers = currentSearchParams.adults + (currentSearchParams.children || 0) + (currentSearchParams.infants || 0);
+            const cabin = formatCabinName(currentSearchParams.cabin || 'economy');
+            summaryEl.textContent = `${slice.from_} → ${slice.to} | ${slice.date} | ${passengers} passenger${passengers === 1 ? '' : 's'} | ${cabin}`;
+            countEl.textContent = `${originalOffers.length} flight${originalOffers.length === 1 ? '' : 's'} found`;
+        }
+
+        function extractAirlines() {
+            const airlinesMap = new Map();
+
+            originalOffers.forEach(offer => {
+                const segments = (offer.slices || offer.price?.slices || [])[0]?.segments || [];
+                segments.forEach(seg => {
+                    if (seg.marketing_carrier) {
+                        const code = seg.marketing_carrier.iata_code;
+                        if (!airlinesMap.has(code)) {
+                            airlinesMap.set(code, {
+                                code: code,
+                                name: seg.marketing_carrier.name || code,
+                                count: 0
+                            });
+                        }
+                        airlinesMap.get(code).count++;
+                    }
+                });
+            });
+
+            availableAirlines = Array.from(airlinesMap.values()).sort((a, b) => b.count - a.count);
+            populateAirlineFilters();
+        }
+
+        function populateAirlineFilters() {
+            const container = document.getElementById('airlinesCheckboxes');
+            if (!availableAirlines.length) {
+                container.innerHTML = '<div class="text-sm text-gray-500">No airline data</div>';
+                return;
+            }
+
+            container.innerHTML = availableAirlines.map(airline => `
+                <label class="flex items-center justify-between cursor-pointer">
+                    <div class="flex items-center">
+                        <input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 airline-filter" value="${airline.code}" checked />
+                        <span class="ml-3 text-sm text-gray-700">${airline.name}</span>
+                    </div>
+                    <span class="text-xs text-gray-500">${airline.count}</span>
+                </label>
+            `).join('');
+
+            container.querySelectorAll('.airline-filter').forEach(cb => {
+                cb.addEventListener('change', applyFiltersAndSort);
+            });
+        }
+
+        function displayBestCheapestFastest(sourceOffers) {
+            const list = Array.isArray(sourceOffers) && sourceOffers.length ? sourceOffers : originalOffers;
+            if (!list.length) return;
+
+            const summaryTabs = document.getElementById('flightSummaryTabs');
+            summaryTabs.style.display = 'grid';
+
+            // Find best (balanced score)
+            const scoredOffers = list.map(offer => {
+                const price = Number(offer.total_amount || offer.price?.total || 0);
+                const duration = getDurationMinutes(offer);
+                const prices = list.map(o => Number(o.total_amount || o.price?.total || 0));
+                const durs = list.map(o => getDurationMinutes(o));
+                const priceRange = Math.max(...prices) - Math.min(...prices) || 1;
+                const durRange = Math.max(...durs) - Math.min(...durs) || 1;
+                const priceScore = (price - Math.min(...prices)) / priceRange;
+                const durationScore = (duration - Math.min(...durs)) / durRange;
+                return { offer, score: priceScore + durationScore };
+            });
+            const bestOffer = scoredOffers.sort((a, b) => a.score - b.score)[0].offer;
+
+            // Find cheapest
+            const cheapestOffer = [...list].sort((a, b) =>
+                Number(a.total_amount || a.price?.total || 0) - Number(b.total_amount || b.price?.total || 0)
+            )[0];
+
+            // Find fastest
+            const fastestOffer = [...list].sort((a, b) =>
+                getDurationMinutes(a) - getDurationMinutes(b)
+            )[0];
+
+            // Update summary tabs
+            document.getElementById('bestPrice').textContent = formatPrice(
+                bestOffer.total_amount || bestOffer.price?.total,
+                bestOffer.total_currency || bestOffer.price?.currency
+            );
+            document.getElementById('bestDuration').textContent = formatDurationFromOffer(bestOffer);
+
+            document.getElementById('cheapestPrice').textContent = formatPrice(
+                cheapestOffer.total_amount || cheapestOffer.price?.total,
+                cheapestOffer.total_currency || cheapestOffer.price?.currency
+            );
+            document.getElementById('cheapestDuration').textContent = formatDurationFromOffer(cheapestOffer);
+
+            document.getElementById('fastestPrice').textContent = formatPrice(
+                fastestOffer.total_amount || fastestOffer.price?.total,
+                fastestOffer.total_currency || fastestOffer.price?.currency
+            );
+            document.getElementById('fastestDuration').textContent = formatDurationFromOffer(fastestOffer);
+
+            // Add click handlers to summary tabs
+            document.querySelectorAll('.card[data-filter]').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const filter = tab.dataset.filter;
+                    document.getElementById('sortBy').value = filter;
+                    applyFiltersAndSort();
+                    document.getElementById('flightResults').scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+        }
+
+        function formatDurationFromOffer(offer) {
+            const minutes = getDurationMinutes(offer);
+            const hours = Math.floor(minutes / 60);
+            const mins = Math.floor(minutes % 60);
+            return `${hours}h ${mins}m`;
+        }
+
+        function initCollapsibleFilters() {
+            document.querySelectorAll('[data-target]').forEach(header => {
+                header.addEventListener('click', () => {
+                    const targetId = header.dataset.target;
+                    const content = document.getElementById(targetId);
+                    const icon = header.querySelector('.toggle-icon');
+
+                    content.classList.toggle('hidden');
+                    icon.classList.toggle('rotate-180');
+                });
+            });
+
+            document.getElementById('clearFilters').addEventListener('click', () => {
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+                const priceRange = document.getElementById('priceRange');
+                if (priceRange) priceRange.value = priceRange.max;
+                applyFiltersAndSort();
+            });
+        }
+
+        function initialiseFilters() {
+            // Price range filter
+            const ranges = originalOffers.map(o => Number(o.total_amount || o.price?.total || 0));
+            const priceRange = document.getElementById('priceRange');
+            const priceRangeLabel = document.getElementById('priceRangeLabel');
+            if (priceRange && ranges.length) {
+                const maxPrice = Math.max(...ranges);
+                const sliderMax = Math.ceil(maxPrice / 50) * 50;
+                priceRange.max = sliderMax;
+                priceRange.value = sliderMax;
+                priceRangeLabel.textContent = `$${sliderMax.toLocaleString()}`;
+                priceRange.addEventListener('input', () => {
+                    priceRangeLabel.textContent = `$${Number(priceRange.value).toLocaleString()}`;
+                    applyFiltersAndSort();
+                });
+            }
+
+            // Stops filters
+            ['filterDirect', 'filterOneStop', 'filterTwoPlus'].forEach(id => {
+                document.getElementById(id)?.addEventListener('change', applyFiltersAndSort);
+            });
+
+            // Departure time filters
+            ['filterMorning', 'filterAfternoon', 'filterEvening', 'filterNight'].forEach(id => {
+                document.getElementById(id)?.addEventListener('change', applyFiltersAndSort);
+            });
+
+            // Sort select
+            document.getElementById('sortBy')?.addEventListener('change', applyFiltersAndSort);
+        }
+
+        function applyFiltersAndSort() {
+            // Stops filters
+            const allowDirect = document.getElementById('filterDirect')?.checked ?? true;
+            const allowOne = document.getElementById('filterOneStop')?.checked ?? true;
+            const allowTwoPlus = document.getElementById('filterTwoPlus')?.checked ?? true;
+
+            // Price filter
+            const maxPrice = Number(document.getElementById('priceRange')?.value || Number.MAX_SAFE_INTEGER);
+
+            // Departure time filters
+            const allowMorning = document.getElementById('filterMorning')?.checked ?? true;
+            const allowAfternoon = document.getElementById('filterAfternoon')?.checked ?? true;
+            const allowEvening = document.getElementById('filterEvening')?.checked ?? true;
+            const allowNight = document.getElementById('filterNight')?.checked ?? true;
+
+            // Airlines filter
+            const selectedAirlines = Array.from(document.querySelectorAll('.airline-filter:checked')).map(cb => cb.value);
+
+            filteredOffers = originalOffers.filter(offer => {
+                const slice = (offer.slices || offer.price?.slices || [])[0] || {};
+                const segments = slice.segments || [];
+
+                // Filter by stops
+                const stops = Math.max(segments.length - 1, 0);
+                if (stops === 0 && !allowDirect) return false;
+                if (stops === 1 && !allowOne) return false;
+                if (stops >= 2 && !allowTwoPlus) return false;
+
+                // Filter by price
+                const price = Number(offer.total_amount || offer.price?.total || 0);
+                if (price > maxPrice) return false;
+
+                // Filter by departure time
+                if (segments.length > 0) {
+                    const departTime = new Date(segments[0].departing_at);
+                    const hour = departTime.getHours();
+                    let timeAllowed = false;
+
+                    if (hour >= 5 && hour < 12 && allowMorning) timeAllowed = true;
+                    if (hour >= 12 && hour < 18 && allowAfternoon) timeAllowed = true;
+                    if (hour >= 18 && hour < 24 && allowEvening) timeAllowed = true;
+                    if (hour >= 0 && hour < 5 && allowNight) timeAllowed = true;
+
+                    if (!timeAllowed) return false;
+                }
+
+                // Filter by airlines
+                if (selectedAirlines.length > 0) {
+                    const offerAirlines = segments.map(seg => seg.marketing_carrier?.iata_code).filter(Boolean);
+                    const hasMatchingAirline = offerAirlines.some(code => selectedAirlines.includes(code));
+                    if (!hasMatchingAirline) return false;
+                }
+
+                return true;
+            });
+
+            const sortValue = document.getElementById('sortBy')?.value || 'best';
+            switch (sortValue) {
+                case 'price':
+                    filteredOffers.sort((a, b) => Number(a.total_amount || a.price?.total || 0) - Number(b.total_amount || b.price?.total || 0));
+                    break;
+                case 'duration':
+                    filteredOffers.sort((a, b) => getDurationMinutes(a) - getDurationMinutes(b));
+                    break;
+                case 'departure':
+                    filteredOffers.sort((a, b) => getDepartureTime(a) - getDepartureTime(b));
+                    break;
+                default:
+                    break;
+            }
+
+            const countEl = document.getElementById('resultCount');
+            if (countEl) countEl.textContent = `${filteredOffers.length} flight${filteredOffers.length === 1 ? '' : 's'} shown`;
+
+            currentPage = 1;
+            renderOffers();
+            displayBestCheapestFastest(filteredOffers);
+        }
+
+        function renderOffers() {
+            const container = document.getElementById('flightResults');
+            container.innerHTML = '';
+
+            if (filteredOffers.length === 0) {
+                container.innerHTML = `
+                    <div class="card p-12 text-center">
+                        <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">No flights found</h3>
+                        <p class="text-gray-600 mb-4">Try adjusting your filters or search criteria</p>
+                        <button id="resetFiltersBtn" class="btn-primary">Reset Filters</button>
+                    </div>
+                `;
+                document.getElementById('resetFiltersBtn')?.addEventListener('click', () => {
+                    document.getElementById('clearFilters').click();
+                });
+                return;
+            }
+
+            filteredOffers.forEach(offer => {
+                const card = createFlightCard(offer);
+                if (card) container.appendChild(card);
+            });
+        }
+
+        function createFlightCard(offer) {
+            const slices = offer.slices || offer.price?.slices || [];
+            if (!slices.length) return null;
+
+            const firstSlice = slices[0];
+            const segments = firstSlice.segments || [];
+            if (!segments.length) return null;
+
+            const first = segments[0];
+            const last = segments[segments.length - 1];
+            const airline = first.marketing_carrier || { name: 'Airline', iata_code: 'XX' };
+            const departTime = new Date(first.departing_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+            const arriveTime = new Date(last.arriving_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+            const duration = calculateDuration(first.departing_at, last.arriving_at);
+            const price = formatPrice(offer.total_amount || offer.price?.total, offer.total_currency || offer.price?.currency);
+            const stops = segments.length - 1;
+            const hasSelfTransfer = checkSelfTransfer(segments);
+
+            const card = document.createElement('div');
+            card.className = 'card p-6 hover:shadow-xl transition-all cursor-pointer animate-fade-in';
+
+            card.innerHTML = `
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <!-- Left: Airline Info -->
+                    <div class="flex items-center gap-4">
+                        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+                            <span class="font-bold text-blue-700 text-sm">${airline.iata_code || 'XX'}</span>
+                        </div>
+                        <div>
+                            <div class="font-bold text-gray-900">${airline.name || 'Airline'}</div>
+                            <div class="text-sm text-gray-500">${stops === 0 ? 'Direct' : `${stops} stop${stops > 1 ? 's' : ''}`}</div>
+                        </div>
+                    </div>
+
+                    <!-- Center: Flight Times -->
+                    <div class="flex items-center gap-6 flex-1 max-w-xl">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-gray-900">${departTime}</div>
+                            <div class="text-sm font-medium text-gray-600">${first.origin?.iata_code || ''}</div>
+                        </div>
+
+                        <div class="flex-1 relative">
+                            <div class="text-center mb-1">
+                                <span class="text-sm text-gray-500">${duration}</span>
+                            </div>
+                            <div class="relative">
+                                <div class="h-0.5 bg-gray-300 w-full"></div>
+                                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white px-2">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="text-center mt-1">
+                                <span class="text-xs text-gray-500">${stops === 0 ? 'Non-stop' : `${stops} stop${stops > 1 ? 's' : ''}`}</span>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-gray-900">${arriveTime}</div>
+                            <div class="text-sm font-medium text-gray-600">${last.destination?.iata_code || ''}</div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Price & Action -->
+                    <div class="flex md:flex-col items-center md:items-end justify-between md:justify-center gap-3">
+                        <div class="text-right">
+                            <div class="text-3xl font-bold text-blue-600">${price}</div>
+                            ${hasSelfTransfer ? '<span class="badge badge-warning text-xs mt-1 inline-block">Self transfer</span>' : ''}
+                        </div>
+                        <button class="btn-primary px-8 py-3 whitespace-nowrap" data-offer-id="${offer.id}">
+                            Select
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            card.querySelector('button').addEventListener('click', () => selectFlight(offer.id));
+            return card;
+        }
+
+        function checkSelfTransfer(segments) {
+            if (segments.length < 2) return false;
+            for (let i = 0; i < segments.length - 1; i++) {
+                const currentCarrier = segments[i].marketing_carrier?.iata_code;
+                const nextCarrier = segments[i + 1].marketing_carrier?.iata_code;
+                if (currentCarrier && nextCarrier && currentCarrier !== nextCarrier) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function calculateDuration(start, end) {
+            const diff = new Date(end) - new Date(start);
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            return `${hours}h ${minutes}m`;
+        }
+
+        function formatPrice(amount, currency) {
+            const value = Number(amount || 0);
+            const curr = String(currency || 'USD').toUpperCase();
+            const symbols = { NGN: '₦', USD: '$', GBP: '£', EUR: '€', ZAR: 'R' };
+            const symbol = symbols[curr] || curr + ' ';
+            if (curr === 'NGN') {
+                return symbol + Math.round(value).toLocaleString();
+            }
+            return symbol + value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function getDurationMinutes(offer) {
+            const slices = offer.slices || offer.price?.slices || [];
+            if (!slices.length) return Number.MAX_SAFE_INTEGER;
+            const segments = slices[0].segments || [];
+            if (!segments.length) return Number.MAX_SAFE_INTEGER;
+            const start = new Date(segments[0].departing_at);
+            const end = new Date(segments[segments.length - 1].arriving_at);
+            return (end - start) / (1000 * 60);
+        }
+
+        function getDepartureTime(offer) {
+            const slices = offer.slices || offer.price?.slices || [];
+            const segment = slices[0]?.segments?.[0];
+            return segment ? new Date(segment.departing_at).getTime() : Number.MAX_SAFE_INTEGER;
+        }
+
+        function selectFlight(offerId) {
+            const stored = sessionStorage.getItem('searchResults');
+            if (!stored) {
+                window.location.href = 'index.html';
+                return;
+            }
+            const parsed = JSON.parse(stored);
+            const offers = Array.isArray(parsed) ? parsed : (parsed.offers || []);
+            const selectedOffer = offers.find(o => o.id === offerId);
+
+            if (!isLoggedIn()) {
+                alert('Please log in to continue with booking.');
+                if (selectedOffer) {
+                    sessionStorage.setItem('selectedOffer', JSON.stringify(selectedOffer));
+                }
+                window.location.href = 'login.html';
+                return;
+            }
+
+            if (selectedOffer) {
+                sessionStorage.setItem('selectedOffer', JSON.stringify(selectedOffer));
+                window.location.href = 'booking.html';
+            }
+        }
+
+        // Mobile menu toggle
+        document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+            const menu = document.createElement('div');
+            menu.className = 'fixed inset-0 bg-black bg-opacity-50 z-50';
+            menu.innerHTML = `
+                <div class="bg-white w-64 h-full p-6">
+                    <button class="mb-6" id="closeMobileMenu">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                    <div class="flex flex-col gap-4">
+                        <a href="about.html" class="text-gray-700 hover:text-blue-600 font-medium">About</a>
+                        <a href="contact.html" class="text-gray-700 hover:text-blue-600 font-medium">Contact</a>
+                        <a href="dashboard.html" class="text-gray-700 hover:text-blue-600 font-medium">My Bookings</a>
+                        <a href="login.html" class="text-gray-700 hover:text-blue-600 font-medium">Login</a>
+                        <a href="signup.html" class="btn-primary text-sm">Sign Up</a>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(menu);
+            document.getElementById('closeMobileMenu').addEventListener('click', () => menu.remove());
+            menu.addEventListener('click', (e) => { if (e.target === menu) menu.remove(); });
+        });
+    </script>
+</body>
+</html>

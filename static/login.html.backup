@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SureFlights</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/tailwind-custom.css">
+</head>
+<body class="theme-light">
+    <div class="auth-container">
+        <div class="auth-card">
+            <a href="/" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; text-decoration: none; color: inherit; margin-bottom: 1.5rem;">
+                <img src="images/logo.png" width="48" height="48" alt="SureFlights Logo" style="object-fit: contain;">
+                <span style="font-size: 1.5rem; font-weight: 700;">SureFlights</span>
+            </a>
+
+            <h2>Welcome Back</h2>
+
+            <div id="error" class="error-message" style="display: none;"></div>
+            <div id="success" class="success-message" style="display: none;"></div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" required placeholder="you@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required placeholder="Enter your password">
+                </div>
+
+                <div style="text-align: right; margin-bottom: 1rem;">
+                    <a href="forgot-password.html" style="color: var(--primary); text-decoration: none; font-size: 0.875rem;">
+                        Forgot password?
+                    </a>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-large" id="submitBtn">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="auth-links">
+                Don't have an account? <a href="signup.html">Sign up</a>
+            </div>
+            <div class="auth-links" style="margin-top: 0.5rem; color: var(--gray-600);">
+                Managing travel for your company? <a href="partner-signup.html">Create a partner account</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="companyModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Select Your Company</h3>
+            </div>
+            <p>We found multiple company accounts for your login. Choose one to continue.</p>
+            <div id="companyModalError" class="error-message" style="display:none; margin-top: 0.75rem;"></div>
+            <ul class="company-list" id="companyList"></ul>
+            <div class="form-actions" style="margin-top: 1.5rem; justify-content: flex-end; gap: 0.75rem;">
+                <button type="button" class="btn btn-outline" id="companyCancelBtn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="companyConfirmBtn" disabled>Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        const loginForm = document.getElementById("loginForm");
+        const submitBtn = document.getElementById("submitBtn");
+        const errorDiv = document.getElementById("error");
+        const successDiv = document.getElementById("success");
+
+        const companyModal = document.getElementById("companyModal");
+        const companyList = document.getElementById("companyList");
+        const companyConfirmBtn = document.getElementById("companyConfirmBtn");
+        const companyCancelBtn = document.getElementById("companyCancelBtn");
+        const companyModalError = document.getElementById("companyModalError");
+
+        let pendingLogin = null;
+        let selectedCompany = null;
+
+        if (isLoggedIn()) {
+            const destination = resolveReturnUrl(getTenantContext());
+            window.location.href = destination;
+        }
+
+        loginForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            await attemptLogin({
+                email: document.getElementById("email").value.trim(),
+                password: document.getElementById("password").value
+            });
+        });
+
+        companyList.addEventListener("click", (event) => {
+            const option = event.target.closest(".company-option");
+            if (!option) {
+                return;
+            }
+            Array.from(companyList.querySelectorAll(".company-option")).forEach((btn) => btn.classList.remove("selected"));
+            option.classList.add("selected");
+            selectedCompany = {
+                id: option.dataset.companyId || null,
+                slug: option.dataset.companySlug || null
+            };
+            companyModalError.style.display = "none";
+            companyConfirmBtn.disabled = false;
+        });
+
+        companyConfirmBtn.addEventListener("click", async () => {
+            if (!selectedCompany || !pendingLogin) {
+                return;
+            }
+            await continueWithCompany();
+        });
+
+        companyCancelBtn.addEventListener("click", () => {
+            hideCompanyModal();
+            pendingLogin = null;
+            setSubmitLoading(false);
+        });
+
+        function resetMessages() {
+            errorDiv.style.display = "none";
+            successDiv.style.display = "none";
+            companyModalError.style.display = "none";
+        }
+
+        function setSubmitLoading(isLoading, loadingLabel = "Signing in...") {
+            submitBtn.disabled = isLoading;
+            submitBtn.textContent = isLoading ? loadingLabel : "Sign In";
+        }
+
+        function resolveReturnUrl(tenantContext) {
+            const params = new URLSearchParams(window.location.search);
+            const requested = params.get("return");
+            if (requested) {
+                return requested;
+            }
+            if (tenantContext && tenantContext.company_id) {
+                return "partner-dashboard.html";
+            }
+            return "dashboard.html";
+        }
+
+        async function attemptLogin(credentials, extra = {}) {
+            resetMessages();
+            setSubmitLoading(true);
+            try {
+                const result = await login(credentials.email, credentials.password, extra);
+                handleLoginResult(result, credentials);
+            } catch (error) {
+                console.error("Login error:", error);
+                errorDiv.textContent = "An unexpected error occurred. Please try again.";
+                errorDiv.style.display = "block";
+                setSubmitLoading(false);
+            }
+        }
+
+        function handleLoginResult(result, credentials) {
+            if (result.success) {
+                handleLoginSuccess(result.tenantContext);
+                return;
+            }
+
+            if (result.needsCompanySelection) {
+                pendingLogin = credentials;
+                showCompanyModal(result.available_companies || []);
+                return;
+            }
+
+            errorDiv.textContent = result.error || "Login failed. Please check your details and try again.";
+            errorDiv.style.display = "block";
+            setSubmitLoading(false);
+        }
+
+        function handleLoginSuccess(tenantContext) {
+            hideCompanyModal();
+            pendingLogin = null;
+            successDiv.textContent = "Login successful! Redirecting...";
+            successDiv.style.display = "block";
+            const destination = resolveReturnUrl(tenantContext);
+            setTimeout(() => {
+                window.location.href = destination;
+            }, 800);
+        }
+
+        function showCompanyModal(companies) {
+            setSubmitLoading(false);
+            selectedCompany = null;
+            companyConfirmBtn.disabled = true;
+            companyModalError.style.display = "none";
+            renderCompanyOptions(companies);
+            companyModal.style.display = "flex";
+            companyModal.setAttribute("aria-hidden", "false");
+        }
+
+        function hideCompanyModal() {
+            companyModal.style.display = "none";
+            companyModal.setAttribute("aria-hidden", "true");
+            companyModalError.style.display = "none";
+            Array.from(companyList.querySelectorAll(".company-option")).forEach((btn) => btn.classList.remove("selected"));
+            selectedCompany = null;
+        }
+
+        function renderCompanyOptions(companies) {
+            companyList.innerHTML = "";
+            if (!Array.isArray(companies) || companies.length === 0) {
+                const empty = document.createElement("li");
+                empty.textContent = "No companies available for selection.";
+                companyList.appendChild(empty);
+                return;
+            }
+            companies.forEach((company, index) => {
+                const item = document.createElement("li");
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "company-option";
+                if (company.id) {
+                    button.dataset.companyId = company.id;
+                }
+                if (company.slug) {
+                    button.dataset.companySlug = company.slug;
+                }
+                const name = document.createElement("div");
+                name.textContent = company.name || company.slug || `Company ${index + 1}`;
+                button.appendChild(name);
+
+                const metaParts = [];
+                if (company.role) {
+                    metaParts.push(company.role.replace(/_/g, " "));
+                }
+                if (company.slug) {
+                    metaParts.push(company.slug);
+                }
+                if (company.domain) {
+                    metaParts.push(company.domain);
+                }
+                if (metaParts.length) {
+                    const meta = document.createElement("span");
+                    meta.textContent = metaParts.join(" � ");
+                    button.appendChild(meta);
+                }
+                item.appendChild(button);
+                companyList.appendChild(item);
+            });
+        }
+
+        async function continueWithCompany() {
+            let completed = false;
+            companyConfirmBtn.disabled = true;
+            companyConfirmBtn.textContent = "Signing in...";
+            try {
+                const extra = {};
+                if (selectedCompany && selectedCompany.id) {
+                    extra.companyId = selectedCompany.id;
+                }
+                if (selectedCompany && selectedCompany.slug) {
+                    extra.companySlug = selectedCompany.slug;
+                }
+                const result = await login(pendingLogin.email, pendingLogin.password, extra);
+                if (result.success) {
+                    completed = true;
+                    handleLoginSuccess(result.tenantContext);
+                    return;
+                }
+                if (result.needsCompanySelection) {
+                    renderCompanyOptions(result.available_companies || []);
+                    companyModalError.textContent = "Please pick a company to continue.";
+                    companyModalError.style.display = "block";
+                    return;
+                }
+                companyModalError.textContent = result.error || "Unable to sign in with the selected company.";
+                companyModalError.style.display = "block";
+            } catch (error) {
+                console.error("Company login error:", error);
+                companyModalError.textContent = "Something went wrong. Please try again.";
+                companyModalError.style.display = "block";
+            } finally {
+                if (!completed) {
+                    companyConfirmBtn.textContent = "Continue";
+                    companyConfirmBtn.disabled = false;
+                }
+                setSubmitLoading(false);
+            }
+        }
+    </script>
+</body>
+</html>

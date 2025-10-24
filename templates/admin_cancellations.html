@@ -1,0 +1,108 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Cancellations{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2>Cancellations</h2>
+        <div style="display: flex; gap: 1rem;">
+            <form method="get" style="display: flex; gap: 0.5rem;">
+                <select name="status" onchange="this.form.submit()">
+                    <option value="">All Statuses</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                    <option value="failed" {% if status_filter == 'failed' %}selected{% endif %}>Failed</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    {% if cancellations %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>PNR</th>
+                <th>Email</th>
+                <th>Original Amount</th>
+                <th>Refund Amount</th>
+                <th>Status</th>
+                <th>Cancelled By</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in cancellations %}
+            <tr>
+                <td><strong>#{{ c.id }}</strong></td>
+                <td>{{ c.pnr or 'N/A' }}</td>
+                <td>{{ c.email or 'N/A' }}</td>
+                <td>₦{{ "{:,.2f}".format(c.total_price_ngn) if c.total_price_ngn else 'N/A' }}</td>
+                <td>
+                    {% if c.refund_amount_minor %}
+                        {% if c.refund_currency == 'NGN' %}
+                            ₦{{ "{:,.2f}".format(c.refund_amount_minor / 100) }}
+                        {% else %}
+                            ${{ "{:,.2f}".format(c.refund_amount_minor / 100) }}
+                        {% endif %}
+                    {% else %}
+                        <span style="color: #999;">Calculating...</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if c.status == 'confirmed' %}
+                        <span class="badge success">Confirmed</span>
+                    {% elif c.status == 'pending' %}
+                        <span class="badge warning">Pending</span>
+                    {% elif c.status == 'failed' %}
+                        <span class="badge danger">Failed</span>
+                    {% else %}
+                        <span class="badge info">{{ c.status }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ c.cancelled_by or 'N/A' }}</td>
+                <td>{{ c.created_at.strftime('%Y-%m-%d %H:%M') if c.created_at else 'N/A' }}</td>
+                <td>
+                    {% if c.status == 'pending' %}
+                        <form method="post" action="/admin/cancellations/{{ c.id }}/process" style="display: inline;">
+                            <button type="submit" class="btn btn-success" onclick="return confirm('Process this cancellation? This will cancel with the supplier and initiate the refund.')">
+                                Process
+                            </button>
+                        </form>
+                    {% else %}
+                        <span style="color: #999;">-</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if total_pages > 1 %}
+    <div class="pagination">
+        {% if page > 1 %}
+            <a href="?page={{ page - 1 }}{% if status_filter %}&status={{ status_filter }}{% endif %}">&laquo; Previous</a>
+        {% endif %}
+
+        {% for p in range(1, total_pages + 1) %}
+            {% if p == page %}
+                <a href="?page={{ p }}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="active">{{ p }}</a>
+            {% elif p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
+                <a href="?page={{ p }}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ p }}</a>
+            {% elif p == page - 3 or p == page + 3 %}
+                <span>...</span>
+            {% endif %}
+        {% endfor %}
+
+        {% if page < total_pages %}
+            <a href="?page={{ page + 1 }}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next &raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% else %}
+    <p style="text-align: center; color: #999; padding: 2rem;">No cancellations found.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Booking - SureFlights</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/tailwind-custom.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="container mx-auto">
+            <div class="flex justify-between items-center py-4">
+                <a href="/" class="flex items-center gap-2 no-underline">
+                    <img src="images/logo.png" width="40" height="40" alt="SureFlights Logo" class="object-contain">
+                    <span class="text-2xl font-bold" style="color: var(--brand-primary);">SureFlights</span>
+                </a>
+
+                <div class="hidden md:flex items-center gap-6">
+                    <button type="button" id="themeToggle" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                        </svg>
+                    </button>
+                    <a href="dashboard.html" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">My Bookings</a>
+                    <button id="logoutLink" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Progress Steps -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="container mx-auto py-4">
+            <div class="flex items-center justify-center gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-bold">✓</div>
+                    <span class="text-sm font-medium text-gray-700">Search</span>
+                </div>
+                <div class="w-16 h-0.5 bg-gray-300"></div>
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold">2</div>
+                    <span class="text-sm font-medium text-blue-600">Booking Details</span>
+                </div>
+                <div class="w-16 h-0.5 bg-gray-300"></div>
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold">3</div>
+                    <span class="text-sm font-medium text-gray-500">Payment</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto py-8">
+        <div class="lg:flex lg:gap-8">
+            <!-- Left Column: Forms -->
+            <div class="lg:flex-1 space-y-6">
+                <!-- Contact Information -->
+                <div class="card p-6 animate-fade-in">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Contact Information</h2>
+                    <form id="bookingForm">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address *</label>
+                                <input type="email" id="email" required
+                                    class="input-field"
+                                    placeholder="your.email@example.com">
+                            </div>
+                            <div>
+                                <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">Phone Number *</label>
+                                <input type="tel" id="phone" required
+                                    class="input-field"
+                                    placeholder="+2348012345678">
+                            </div>
+                        </div>
+
+                        <!-- Passenger Forms -->
+                        <div id="passengersContainer"></div>
+
+                        <!-- Promo Code -->
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4">Have a promo code?</h3>
+                            <div class="flex gap-3">
+                                <div class="flex-1">
+                                    <input type="text" id="promoCode"
+                                        class="input-field uppercase"
+                                        placeholder="Enter promo code">
+                                    <div id="promoError" class="hidden mt-2 text-sm text-red-600"></div>
+                                    <div id="promoSuccess" class="hidden mt-2 text-sm text-green-600"></div>
+                                </div>
+                                <button type="button" id="applyPromoBtn" class="btn-secondary px-6">
+                                    Apply
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Payment Method -->
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4">Choose Payment Method</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="paymentMethodOptions">
+                                <button type="button" class="payment-method-option selected" data-method="card">
+                                    <svg class="w-8 h-8 text-blue-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                                    </svg>
+                                    <span class="font-semibold">Card</span>
+                                    <span class="text-sm text-gray-500">Debit or credit card</span>
+                                </button>
+                                <button type="button" class="payment-method-option" data-method="bank">
+                                    <svg class="w-8 h-8 text-blue-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path>
+                                    </svg>
+                                    <span class="font-semibold">Bank Transfer</span>
+                                    <span class="text-sm text-gray-500">Direct bank transfer</span>
+                                </button>
+                                <button type="button" class="payment-method-option" data-method="ussd">
+                                    <svg class="w-8 h-8 text-blue-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span class="font-semibold">USSD</span>
+                                    <span class="text-sm text-gray-500">Bank USSD code</span>
+                                </button>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-4">
+                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                </svg>
+                                Secure payment powered by Paystack
+                            </p>
+                        </div>
+
+                        <div id="error" class="hidden mt-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"></div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex gap-4 mt-8">
+                            <button type="button" class="btn-secondary flex-1" onclick="window.history.back()">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                                Back
+                            </button>
+                            <button type="submit" class="btn-primary flex-1" id="submitBtn">
+                                Proceed to Payment
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right Column: Summary -->
+            <aside class="lg:w-96 mt-6 lg:mt-0">
+                <div class="card p-6 sticky top-24 animate-fade-in">
+                    <h2 class="text-xl font-bold text-gray-900 mb-6">Booking Summary</h2>
+                    <div id="flightSummary"></div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>SureFlights</h3>
+                    <p>Your trusted partner for finding and booking the best flight deals worldwide.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="/">Home</a>
+                    <a href="about.html">About Us</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <a href="contact.html">Help Center</a>
+                    <a href="contact.html">Customer Service</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 SureFlights. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+        .payment-method-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .payment-method-option:hover {
+            border-color: var(--brand-primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .payment-method-option.selected {
+            border-color: var(--brand-primary);
+            background: var(--brand-primary-light);
+            box-shadow: 0 0 0 3px rgba(7, 112, 227, 0.1);
+        }
+    </style>
+
+    <script src="auth.js"></script>
+    <script src="main.js"></script>
+    <script>
+        let selectedOffer = null;
+        let appliedPromoCode = null;
+        let originalAmount = 0;
+        let finalAmount = 0;
+        let selectedPaymentMethod = 'card';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initThemeToggle();
+            updateNavigation();
+
+            if (!isLoggedIn()) {
+                alert('Please log in to continue.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            selectedOffer = JSON.parse(sessionStorage.getItem('selectedOffer'));
+            const searchParams = JSON.parse(sessionStorage.getItem('searchParams'));
+
+            if (!selectedOffer || !searchParams) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const storedMethod = sessionStorage.getItem('paymentMethod');
+            if (storedMethod && ['card', 'bank', 'ussd'].includes(storedMethod)) {
+                selectedPaymentMethod = storedMethod;
+            }
+
+            setupPaymentMethodSelection();
+            sessionStorage.setItem('paymentMethod', selectedPaymentMethod);
+
+            originalAmount = parseFloat(selectedOffer.total_amount || selectedOffer.price?.total || 0);
+            finalAmount = originalAmount;
+
+            displayFlightSummary(selectedOffer);
+            generatePassengerForms(searchParams);
+        });
+
+        function setupPaymentMethodSelection() {
+            const options = document.querySelectorAll('.payment-method-option');
+            options.forEach(option => {
+                if (option.dataset.method === selectedPaymentMethod) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+
+                option.addEventListener('click', () => {
+                    options.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                    selectedPaymentMethod = option.dataset.method;
+                    sessionStorage.setItem('paymentMethod', selectedPaymentMethod);
+                });
+            });
+        }
+
+        function displayFlightSummary(offer) {
+            const slices = offer.slices || offer.price?.slices || [];
+            const segment = slices[0]?.segments?.[0];
+            if (!segment) return;
+
+            const airline = segment.marketing_carrier || { name: 'Airline', iata_code: 'XX' };
+            const lastSegment = slices[0].segments[slices[0].segments.length - 1];
+
+            const departTime = new Date(segment.departing_at).toLocaleString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const arriveTime = new Date(lastSegment.arriving_at).toLocaleString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const price = formatPrice(finalAmount, offer.total_currency || offer.price?.currency);
+            const originalPrice = formatPrice(originalAmount, offer.total_currency || offer.price?.currency);
+
+            const summary = document.getElementById('flightSummary');
+            summary.innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3 pb-4 border-b border-gray-200">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+                            <span class="font-bold text-blue-700 text-sm">${airline.iata_code}</span>
+                        </div>
+                        <div>
+                            <div class="font-bold text-gray-900">${airline.name}</div>
+                            <div class="text-sm text-gray-500">${slices[0].segments.length > 1 ? `${slices[0].segments.length - 1} stop${slices[0].segments.length > 2 ? 's' : ''}` : 'Direct'}</div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">From</span>
+                            <span class="font-semibold text-gray-900">${segment.origin.iata_code}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">To</span>
+                            <span class="font-semibold text-gray-900">${lastSegment.destination.iata_code}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Departure</span>
+                            <span class="font-semibold text-gray-900 text-sm">${departTime}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Arrival</span>
+                            <span class="font-semibold text-gray-900 text-sm">${arriveTime}</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-gray-200">
+                        <div class="space-y-2">
+                            ${appliedPromoCode ? `
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Original Price</span>
+                                    <span class="text-gray-500 line-through">${originalPrice}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-green-600">Promo Discount</span>
+                                    <span class="text-green-600">-${formatPrice(originalAmount - finalAmount, offer.total_currency || offer.price?.currency)}</span>
+                                </div>
+                            ` : ''}
+                            <div class="flex justify-between items-center pt-2">
+                                <span class="font-bold text-gray-900">Total</span>
+                                <span class="text-2xl font-bold text-blue-600">${price}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generatePassengerForms(searchParams) {
+            const container = document.getElementById('passengersContainer');
+            const adults = searchParams.adults || 1;
+            const children = searchParams.children || 0;
+            const infants = searchParams.infants || 0;
+
+            let html = '<div class="mt-8 pt-6 border-t border-gray-200"><h3 class="text-lg font-bold text-gray-900 mb-6">Passenger Information</h3>';
+
+            let passengerIndex = 0;
+
+            // Adults
+            for (let i = 0; i < adults; i++) {
+                html += createPassengerForm(passengerIndex, 'adult', i + 1);
+                passengerIndex++;
+            }
+
+            // Children
+            for (let i = 0; i < children; i++) {
+                html += createPassengerForm(passengerIndex, 'child', i + 1);
+                passengerIndex++;
+            }
+
+            // Infants
+            for (let i = 0; i < infants; i++) {
+                html += createPassengerForm(passengerIndex, 'infant_without_seat', i + 1);
+                passengerIndex++;
+            }
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function createPassengerForm(index, type, number) {
+            const typeLabel = type === 'adult' ? 'Adult' : type === 'child' ? 'Child' : 'Infant';
+            return `
+                <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                    <h4 class="font-semibold text-gray-900 mb-4">${typeLabel} ${number}</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Title *</label>
+                            <select class="input-field" id="title_${index}" required>
+                                <option value="">Select</option>
+                                <option value="mr">Mr</option>
+                                <option value="ms">Ms</option>
+                                <option value="mrs">Mrs</option>
+                                <option value="miss">Miss</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">First Name *</label>
+                            <input type="text" class="input-field" id="firstName_${index}" required placeholder="As on passport">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Last Name *</label>
+                            <input type="text" class="input-field" id="lastName_${index}" required placeholder="As on passport">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Date of Birth *</label>
+                            <input type="date" class="input-field" id="dob_${index}" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Gender *</label>
+                            <select class="input-field" id="gender_${index}" required>
+                                <option value="">Select</option>
+                                <option value="m">Male</option>
+                                <option value="f">Female</option>
+                            </select>
+                        </div>
+                    </div>
+                    <input type="hidden" id="type_${index}" value="${type}">
+                </div>
+            `;
+        }
+
+        // Promo code
+        document.getElementById('applyPromoBtn')?.addEventListener('click', async () => {
+            const promoCode = document.getElementById('promoCode').value.trim().toUpperCase();
+            const errorEl = document.getElementById('promoError');
+            const successEl = document.getElementById('promoSuccess');
+
+            errorEl.classList.add('hidden');
+            successEl.classList.add('hidden');
+
+            if (!promoCode) {
+                errorEl.textContent = 'Please enter a promo code';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/v1/promo-codes/validate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getAccessToken()}`
+                    },
+                    body: JSON.stringify({
+                        code: promoCode,
+                        amount: originalAmount
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.valid) {
+                    appliedPromoCode = promoCode;
+                    finalAmount = data.final_amount || originalAmount;
+                    successEl.textContent = `Promo code applied! You saved ${formatPrice(originalAmount - finalAmount, selectedOffer.total_currency || selectedOffer.price?.currency)}`;
+                    successEl.classList.remove('hidden');
+                    displayFlightSummary(selectedOffer);
+                } else {
+                    errorEl.textContent = data.error || 'Invalid promo code';
+                    errorEl.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Promo code error:', error);
+                errorEl.textContent = 'Failed to validate promo code';
+                errorEl.classList.remove('hidden');
+            }
+        });
+
+        // Form submission
+        document.getElementById('bookingForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const errorEl = document.getElementById('error');
+            errorEl.classList.add('hidden');
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Processing...';
+
+            const searchParams = JSON.parse(sessionStorage.getItem('searchParams'));
+            const totalPassengers = (searchParams.adults || 1) + (searchParams.children || 0) + (searchParams.infants || 0);
+
+            const passengers = [];
+            for (let i = 0; i < totalPassengers; i++) {
+                passengers.push({
+                    title: document.getElementById(`title_${i}`).value,
+                    given_name: document.getElementById(`firstName_${i}`).value,
+                    family_name: document.getElementById(`lastName_${i}`).value,
+                    born_on: document.getElementById(`dob_${i}`).value,
+                    gender: document.getElementById(`gender_${i}`).value,
+                    type: document.getElementById(`type_${i}`).value
+                });
+            }
+
+            const bookingData = {
+                offer_id: selectedOffer.id,
+                passengers: passengers,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                payment_method: selectedPaymentMethod
+            };
+
+            if (appliedPromoCode) {
+                bookingData.promo_code = appliedPromoCode;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/v1/book`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getAccessToken()}`
+                    },
+                    body: JSON.stringify(bookingData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    sessionStorage.setItem('bookingResponse', JSON.stringify(data));
+                    window.location.href = data.authorization_url || 'confirmation.html';
+                } else {
+                    errorEl.textContent = data.error || 'Booking failed. Please try again.';
+                    errorEl.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Proceed to Payment <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>';
+                }
+            } catch (error) {
+                console.error('Booking error:', error);
+                errorEl.textContent = 'An error occurred. Please try again.';
+                errorEl.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Proceed to Payment <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>';
+            }
+        });
+
+        function formatPrice(amount, currency) {
+            const value = Number(amount || 0);
+            const curr = String(currency || 'USD').toUpperCase();
+            const symbols = { NGN: '₦', USD: '$', GBP: '£', EUR: '€', ZAR: 'R' };
+            const symbol = symbols[curr] || curr + ' ';
+            if (curr === 'NGN') {
+                return symbol + Math.round(value).toLocaleString();
+            }
+            return symbol + value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+    </script>
+</body>
+</html>
