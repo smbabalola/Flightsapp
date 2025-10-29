@@ -9,8 +9,8 @@ __pycache__/
 *.pyc
 *.pyo
 # Env files
-.env
-.env.*
+#.env
+#.env.*
 
 # Build & logs
 dist/
